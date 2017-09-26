@@ -1,5 +1,8 @@
 package com.restful.blog.user;
 
+import com.piwyd.user.UserDao;
+import com.piwyd.user.UserRepository;
+import com.piwyd.user.UserServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,25 +42,25 @@ public class UserServiceTest {
         user1 = UserDao.builder()
                 .id(1L)
                 .idUser(10)
-                .nameUser("firstUser")
+                .emailUser("firstUser")
                 .build();
 
         user2 = UserDao.builder()
                 .id(2L)
                 .idUser(20)
-                .nameUser("secondUser")
+                .emailUser("secondUser")
                 .build();
 
         user3 = UserDao.builder()
                 .id(3L)
                 .idUser(30)
-                .nameUser("thirdUser")
+                .emailUser("thirdUser")
                 .build();
 
         user4 = UserDao.builder()
                 .id(4L)
                 .idUser(40)
-                .nameUser("fourthUser")
+                .emailUser("fourthUser")
                 .build();
     }
 

@@ -1,9 +1,13 @@
 package com.restful.blog.user;
 
+import com.piwyd.user.UserDao;
+import com.piwyd.user.UserRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
@@ -31,6 +35,6 @@ public class UserRepositoryTest {
         UserDao userbyIdUser = userRepository.findByIdUser(idUser);
 
         assertThat(userbyIdUser.getIdUser()).isEqualTo(idUser);
-        assertThat(userbyIdUser.getNameUser()).isEqualTo("first");
+        assertThat(userbyIdUser.getEmailUser()).isEqualTo("first");
     }
 }

@@ -28,5 +28,8 @@ public class UserDao {
     @Column
     @NotEmpty
     @NotNull
-    private String nameUser;
+    private String emailUser;
+
+    @Column
+    private String passwordUser;
 }

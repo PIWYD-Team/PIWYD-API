@@ -1,5 +1,8 @@
 package com.restful.blog.user;
 
+import com.piwyd.user.UserAdapter;
+import com.piwyd.user.UserDao;
+import com.piwyd.user.UserDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -7,9 +10,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Created by rfruitet on 11/08/2017.
- */
 @RunWith(SpringRunner.class)
 public class UserAdapterTest {
 
@@ -19,26 +19,30 @@ public class UserAdapterTest {
     @Test
     public void should_return_an_user_dao() {
         UserDto userDto  = UserDto.builder()
-                .idUser(1)
-                .nameUser("userName")
+                .id(1)
+                .email("userName")
+                .password("azerty")
                 .build();
 
         UserDao userDao = userAdapter.userToDao(userDto);
 
-        assertThat(userDao.getIdUser()).isEqualTo(userDto.getIdUser());
-        assertThat(userDao.getNameUser()).isEqualTo(userDto.getNameUser());
+        assertThat(userDao.getIdUser()).isEqualTo(userDto.getId());
+        assertThat(userDao.getEmailUser()).isEqualTo(userDto.getEmail());
+        assertThat(userDao.getPasswordUser()).isEqualTo(userDto.getPassword());
     }
 
     @Test
     public void should_return_an_user_dto() {
         UserDao userDao  = UserDao.builder()
                 .idUser(1)
-                .nameUser("userName")
+                .emailUser("userName")
+                .passwordUser("azerty")
                 .build();
 
         UserDto userDto = userAdapter.userToDto(userDao);
 
-        assertThat(userDto.getIdUser()).isEqualTo(userDao.getIdUser());
-        assertThat(userDto.getNameUser()).isEqualTo(userDao.getNameUser());
+        assertThat(userDto.getId()).isEqualTo(userDao.getIdUser());
+        assertThat(userDto.getEmail()).isEqualTo(userDao.getEmailUser());
+        assertThat(userDto.getPassword()).isEqualTo(userDao.getPasswordUser());
     }
 }
