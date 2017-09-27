@@ -31,7 +31,7 @@ public class UserRepositoryTest {
 
     @Test
     public void should_get_user_by_id_user() {
-        int idUser = 1;
+        Long idUser = 1L;
         UserDao userbyIdUser = userRepository.findByIdUser(idUser);
 
         assertThat(userbyIdUser.getIdUser()).isEqualTo(idUser);

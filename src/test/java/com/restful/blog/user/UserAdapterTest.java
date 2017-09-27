@@ -19,7 +19,7 @@ public class UserAdapterTest {
     @Test
     public void should_return_an_user_dao() {
         UserDto userDto  = UserDto.builder()
-                .id(1)
+                .id(1L)
                 .email("userName")
                 .password("azerty")
                 .build();
@@ -34,7 +34,7 @@ public class UserAdapterTest {
     @Test
     public void should_return_an_user_dto() {
         UserDao userDao  = UserDao.builder()
-                .idUser(1)
+                .idUser(1L)
                 .emailUser("userName")
                 .passwordUser("azerty")
                 .build();

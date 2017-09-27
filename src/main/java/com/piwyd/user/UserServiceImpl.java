@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,6 +16,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserAdapter userAdapter;
 
+    @Autowired
+
+
     @Override
     public List<UserDto> getAllUsers() {
         List<UserDto> listUsers = userRepository.findAll()
@@ -25,31 +29,51 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto addUser(UserDto userDto) {
+    public UserDto addUser(UserDto userDto) throws EmailAddressAlreadyExistsException {
+
+        if (checkUserAlreadyExist(userDto))
+            throw new EmailAddressAlreadyExistsException(userDto.getEmail());
+
+        UUID userId = UUID.randomUUID();
+        userDto.setId(userId.getMostSignificantBits());
+
         UserDao newUser = userAdapter.userToDao(userDto);
         newUser = userRepository.save(newUser);
         return userAdapter.userToDto(newUser);
     }
 
     @Override
-    public UserDto getUserById(int id) {
+    public UserDto getUserById(Long id) {
         UserDao userDao = userRepository.findByIdUser(id);
         UserDto userDto = userAdapter.userToDto(userDao);
         return userDto;
     }
 
     @Override
-    public void removeUser(int idUser) {
+    public UserDto getUserByEmail(String email) {
+        UserDao userByEmail = userRepository.findByEmailUser(email);
+        return userAdapter.userToDto(userByEmail);
+    }
+
+    @Override
+    public void removeUser(Long idUser) {
         UserDao userToDelete = userRepository.findByIdUser(idUser);
         userRepository.delete(userToDelete);
     }
 
     @Override
-    public UserDto modifyUser(int id, UserDto userDto) {
+    public UserDto modifyUser(Long id, UserDto userDto) {
         UserDao userToUpdate = userRepository.findByIdUser(id);
-        if (userDto.getNameUser() != null &&
-                userDto.getNameUser().length() > 1)
-            userToUpdate.setNameUser(userDto.getNameUser());
+        if (userDto.getEmail() != null &&
+                userDto.getEmail().length() > 1)
+            userToUpdate.setEmailUser(userDto.getEmail());
         return userAdapter.userToDto(userRepository.save(userToUpdate));
+    }
+
+    private boolean checkUserAlreadyExist(UserDto userDto) {
+        UserDao userByEmail = userRepository.findByEmailUser(userDto.getEmail());
+        if (userByEmail != null)
+            return true;
+        return false;
     }
 }

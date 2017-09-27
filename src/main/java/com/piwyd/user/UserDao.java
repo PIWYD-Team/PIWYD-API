@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -23,13 +25,17 @@ public class UserDao {
 
     @Column
     @NotNull
-    private int idUser;
+    private Long idUser;
 
     @Column
     @NotEmpty
     @NotNull
+    @Email
     private String emailUser;
 
     @Column
+    @NotNull
+    @NotEmpty
+    @Length(min = 8)
     private String passwordUser;
 }

@@ -1,13 +1,14 @@
 package com.piwyd.web.rs;
 
-import com.piwyd.user.UserDto;
-import com.piwyd.user.UserService;
+import com.piwyd.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -33,7 +34,7 @@ public class UserController {
     @GetMapping("/{userId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public UserDto getUser(@PathVariable("userId") int id) {
+    public UserDto getUser(@PathVariable("userId") Long id) throws UserNotFoundException {
         UserDto userById = userService.getUserById(id);
         return userById;
     }
@@ -41,21 +42,24 @@ public class UserController {
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody UserDto userDto) {
+    public UserDto createUser(@RequestBody @Valid  UserDto userDto, BindingResult bindingResult) throws EmailAddressAlreadyExistsException {
+        if (bindingResult.hasErrors())
+            throw new UserValidationException();
+
         UserDto newUser = userService.addUser(userDto);
         return newUser;
     }
 
     @DeleteMapping(value = "/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable("userId") int id) {
+    public void deleteUser(@PathVariable("userId") Long id) throws UserNotFoundException {
         userService.removeUser(id);
     }
 
     @PutMapping("/{userId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto updateUser(@PathVariable("userId") int id, @RequestBody UserDto userDto) {
+    public UserDto updateUser(@PathVariable("userId") Long id, @RequestBody UserDto userDto) {
         UserDto updatedUser = userService.modifyUser(id, userDto);
         return updatedUser;
     }

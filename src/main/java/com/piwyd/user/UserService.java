@@ -9,11 +9,13 @@ public interface UserService {
     @Transactional(readOnly = true)
     List<UserDto> getAllUsers();
 
-    UserDto addUser(UserDto userDto);
+    UserDto addUser(UserDto userDto) throws EmailAddressAlreadyExistsException;
 
-    UserDto getUserById(int id);
+    UserDto getUserById(Long id);
 
-    void removeUser(int id);
+    UserDto getUserByEmail(String email);
 
-    UserDto modifyUser(int id, UserDto userDto);
+    void removeUser(Long id);
+
+    UserDto modifyUser(Long id, UserDto userDto);
 }

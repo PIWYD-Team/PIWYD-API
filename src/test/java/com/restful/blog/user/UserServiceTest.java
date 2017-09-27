@@ -41,25 +41,25 @@ public class UserServiceTest {
 
         user1 = UserDao.builder()
                 .id(1L)
-                .idUser(10)
+                .idUser(10L)
                 .emailUser("firstUser")
                 .build();
 
         user2 = UserDao.builder()
                 .id(2L)
-                .idUser(20)
+                .idUser(20L)
                 .emailUser("secondUser")
                 .build();
 
         user3 = UserDao.builder()
                 .id(3L)
-                .idUser(30)
+                .idUser(30L)
                 .emailUser("thirdUser")
                 .build();
 
         user4 = UserDao.builder()
                 .id(4L)
-                .idUser(40)
+                .idUser(40L)
                 .emailUser("fourthUser")
                 .build();
     }
@@ -77,7 +77,7 @@ public class UserServiceTest {
 
         when(userRepository.findAll()).thenReturn(users);
         when(userRepository.save(any(UserDao.class))).thenReturn(user1);
-        when(userRepository.findByIdUser(10)).thenReturn(user1);
+        when(userRepository.findByIdUser(10L)).thenReturn(user1);
     }
 
     @Test
