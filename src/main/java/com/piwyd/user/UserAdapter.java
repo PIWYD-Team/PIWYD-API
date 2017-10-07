@@ -7,17 +7,17 @@ public class UserAdapter {
 
     public UserDto userToDto(UserDao userDao) {
         return UserDto.builder()
-                .id(userDao.getIdUser())
-                .email(userDao.getEmailUser())
-                .password(userDao.getPasswordUser())
+                .id(userDao.getId())
+                .email(userDao.getEmail())
+                .password(userDao.getPassword())
                 .build();
     }
 
     public UserDao userToDao(UserDto userDto) {
         return UserDao.builder()
-                .idUser(userDto.getId())
-                .emailUser(userDto.getEmail())
-                .passwordUser(userDto.getPassword())
+                .id(userDto.getId())
+                .email(userDto.getEmail())
+                .password(userDto.getPassword())
                 .build();
     }
 }

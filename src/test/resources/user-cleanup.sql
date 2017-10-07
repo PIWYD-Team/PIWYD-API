@@ -1,1 +1,1 @@
-delete from user_dao;
+delete from user;

@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table
+@Table(name = "user")
 public class UserDao {
 
     @Id
@@ -24,18 +24,17 @@ public class UserDao {
     private Long id;
 
     @Column
-    @NotNull
-    private Long idUser;
+    private String name;
 
     @Column
     @NotEmpty
     @NotNull
     @Email
-    private String emailUser;
+    private String email;
 
     @Column
     @NotNull
     @NotEmpty
     @Length(min = 8)
-    private String passwordUser;
+    private String password;
 }

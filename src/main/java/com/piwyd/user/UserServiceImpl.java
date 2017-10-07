@@ -44,34 +44,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long id) {
-        UserDao userDao = userRepository.findByIdUser(id);
+        UserDao userDao = userRepository.findById(id);
         UserDto userDto = userAdapter.userToDto(userDao);
         return userDto;
     }
 
     @Override
     public UserDto getUserByEmail(String email) {
-        UserDao userByEmail = userRepository.findByEmailUser(email);
+        UserDao userByEmail = userRepository.findByEmail(email);
         return userAdapter.userToDto(userByEmail);
     }
 
     @Override
     public void removeUser(Long idUser) {
-        UserDao userToDelete = userRepository.findByIdUser(idUser);
+        UserDao userToDelete = userRepository.findById(idUser);
         userRepository.delete(userToDelete);
     }
 
     @Override
     public UserDto modifyUser(Long id, UserDto userDto) {
-        UserDao userToUpdate = userRepository.findByIdUser(id);
+        UserDao userToUpdate = userRepository.findById(id);
         if (userDto.getEmail() != null &&
                 userDto.getEmail().length() > 1)
-            userToUpdate.setEmailUser(userDto.getEmail());
+            userToUpdate.setEmail(userDto.getEmail());
         return userAdapter.userToDto(userRepository.save(userToUpdate));
     }
 
     private boolean checkUserAlreadyExist(UserDto userDto) {
-        UserDao userByEmail = userRepository.findByEmailUser(userDto.getEmail());
+        UserDao userByEmail = userRepository.findByEmail(userDto.getEmail());
         if (userByEmail != null)
             return true;
         return false;

@@ -1,4 +1,4 @@
-package com.restful.blog.user;
+package com.piwyd.user;
 
 import com.piwyd.user.UserAdapter;
 import com.piwyd.user.UserDao;
@@ -26,23 +26,23 @@ public class UserAdapterTest {
 
         UserDao userDao = userAdapter.userToDao(userDto);
 
-        assertThat(userDao.getIdUser()).isEqualTo(userDto.getId());
-        assertThat(userDao.getEmailUser()).isEqualTo(userDto.getEmail());
-        assertThat(userDao.getPasswordUser()).isEqualTo(userDto.getPassword());
+        assertThat(userDao.getId()).isEqualTo(userDto.getId());
+        assertThat(userDao.getEmail()).isEqualTo(userDto.getEmail());
+        assertThat(userDao.getPassword()).isEqualTo(userDto.getPassword());
     }
 
     @Test
     public void should_return_an_user_dto() {
         UserDao userDao  = UserDao.builder()
-                .idUser(1L)
-                .emailUser("userName")
-                .passwordUser("azerty")
+                .id(1L)
+                .email("userName")
+                .password("azerty")
                 .build();
 
         UserDto userDto = userAdapter.userToDto(userDao);
 
-        assertThat(userDto.getId()).isEqualTo(userDao.getIdUser());
-        assertThat(userDto.getEmail()).isEqualTo(userDao.getEmailUser());
-        assertThat(userDto.getPassword()).isEqualTo(userDao.getPasswordUser());
+        assertThat(userDto.getId()).isEqualTo(userDao.getId());
+        assertThat(userDto.getEmail()).isEqualTo(userDao.getEmail());
+        assertThat(userDto.getPassword()).isEqualTo(userDao.getPassword());
     }
 }

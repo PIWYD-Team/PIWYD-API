@@ -1,4 +1,4 @@
-package com.restful.blog.user;
+package com.piwyd.user;
 
 import com.piwyd.user.UserDao;
 import com.piwyd.user.UserRepository;
@@ -41,26 +41,26 @@ public class UserServiceTest {
 
         user1 = UserDao.builder()
                 .id(1L)
-                .idUser(10L)
-                .emailUser("firstUser")
+                .id(10L)
+                .email("firstUser")
                 .build();
 
         user2 = UserDao.builder()
                 .id(2L)
-                .idUser(20L)
-                .emailUser("secondUser")
+                .id(20L)
+                .email("secondUser")
                 .build();
 
         user3 = UserDao.builder()
                 .id(3L)
-                .idUser(30L)
-                .emailUser("thirdUser")
+                .id(30L)
+                .email("thirdUser")
                 .build();
 
         user4 = UserDao.builder()
                 .id(4L)
-                .idUser(40L)
-                .emailUser("fourthUser")
+                .id(40L)
+                .email("fourthUser")
                 .build();
     }
 
@@ -77,7 +77,7 @@ public class UserServiceTest {
 
         when(userRepository.findAll()).thenReturn(users);
         when(userRepository.save(any(UserDao.class))).thenReturn(user1);
-        when(userRepository.findByIdUser(10L)).thenReturn(user1);
+        when(userRepository.findById(10L)).thenReturn(user1);
     }
 
     @Test

@@ -1,4 +1,4 @@
-package com.restful.blog.user;
+package com.piwyd.user;
 
 import org.springframework.test.context.jdbc.Sql;
 
