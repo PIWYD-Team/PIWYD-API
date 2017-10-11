@@ -1,8 +1,5 @@
 package com.piwyd.user;
 
-import com.piwyd.user.UserAdapter;
-import com.piwyd.user.UserDao;
-import com.piwyd.user.UserDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -24,25 +21,25 @@ public class UserAdapterTest {
                 .password("azerty")
                 .build();
 
-        UserDao userDao = userAdapter.userToDao(userDto);
+        UserEntity userEntity = userAdapter.userToDao(userDto);
 
-        assertThat(userDao.getId()).isEqualTo(userDto.getId());
-        assertThat(userDao.getEmail()).isEqualTo(userDto.getEmail());
-        assertThat(userDao.getPassword()).isEqualTo(userDto.getPassword());
+        assertThat(userEntity.getId()).isEqualTo(userDto.getId());
+        assertThat(userEntity.getEmail()).isEqualTo(userDto.getEmail());
+        assertThat(userEntity.getPassword()).isEqualTo(userDto.getPassword());
     }
 
     @Test
     public void should_return_an_user_dto() {
-        UserDao userDao  = UserDao.builder()
+        UserEntity userEntity = UserEntity.builder()
                 .id(1L)
                 .email("userName")
                 .password("azerty")
                 .build();
 
-        UserDto userDto = userAdapter.userToDto(userDao);
+        UserDto userDto = userAdapter.userToDto(userEntity);
 
-        assertThat(userDto.getId()).isEqualTo(userDao.getId());
-        assertThat(userDto.getEmail()).isEqualTo(userDao.getEmail());
-        assertThat(userDto.getPassword()).isEqualTo(userDao.getPassword());
+        assertThat(userDto.getId()).isEqualTo(userEntity.getId());
+        assertThat(userDto.getEmail()).isEqualTo(userEntity.getEmail());
+        assertThat(userDto.getPassword()).isEqualTo(userEntity.getPassword());
     }
 }

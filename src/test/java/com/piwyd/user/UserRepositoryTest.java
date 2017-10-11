@@ -20,7 +20,7 @@ public class UserRepositoryTest {
 
     @Test
     public void should_get_all_users() {
-        List<UserDao> all = userRepository.findAll();
+        List<UserEntity> all = userRepository.findAll();
 
         assertThat(all.size()).isEqualTo(3);
     }
@@ -28,7 +28,7 @@ public class UserRepositoryTest {
     @Test
     public void should_get_user_by_id_user() {
         Long idUser = 1L;
-        UserDao userbyIdUser = userRepository.findById(idUser);
+        UserEntity userbyIdUser = userRepository.findById(idUser);
 
         assertThat(userbyIdUser.getId()).isEqualTo(idUser);
         assertThat(userbyIdUser.getEmail()).isEqualTo("first@first.first");

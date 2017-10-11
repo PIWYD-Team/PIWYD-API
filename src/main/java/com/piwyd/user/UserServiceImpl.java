@@ -37,33 +37,33 @@ public class UserServiceImpl implements UserService {
         UUID userId = UUID.randomUUID();
         userDto.setId(userId.getMostSignificantBits());
 
-        UserDao newUser = userAdapter.userToDao(userDto);
+        UserEntity newUser = userAdapter.userToDao(userDto);
         newUser = userRepository.save(newUser);
         return userAdapter.userToDto(newUser);
     }
 
     @Override
     public UserDto getUserById(Long id) {
-        UserDao userDao = userRepository.findById(id);
-        UserDto userDto = userAdapter.userToDto(userDao);
+        UserEntity userEntity = userRepository.findById(id);
+        UserDto userDto = userAdapter.userToDto(userEntity);
         return userDto;
     }
 
     @Override
     public UserDto getUserByEmail(String email) {
-        UserDao userByEmail = userRepository.findByEmail(email);
+        UserEntity userByEmail = userRepository.findByEmail(email);
         return userAdapter.userToDto(userByEmail);
     }
 
     @Override
     public void removeUser(Long idUser) {
-        UserDao userToDelete = userRepository.findById(idUser);
+        UserEntity userToDelete = userRepository.findById(idUser);
         userRepository.delete(userToDelete);
     }
 
     @Override
     public UserDto modifyUser(Long id, UserDto userDto) {
-        UserDao userToUpdate = userRepository.findById(id);
+        UserEntity userToUpdate = userRepository.findById(id);
         if (userDto.getEmail() != null &&
                 userDto.getEmail().length() > 1)
             userToUpdate.setEmail(userDto.getEmail());
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean checkUserAlreadyExist(UserDto userDto) {
-        UserDao userByEmail = userRepository.findByEmail(userDto.getEmail());
+        UserEntity userByEmail = userRepository.findByEmail(userDto.getEmail());
         if (userByEmail != null)
             return true;
         return false;

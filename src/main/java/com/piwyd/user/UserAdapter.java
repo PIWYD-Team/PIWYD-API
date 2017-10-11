@@ -5,16 +5,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserAdapter {
 
-    public UserDto userToDto(UserDao userDao) {
+    public UserDto userToDto(UserEntity userEntity) {
         return UserDto.builder()
-                .id(userDao.getId())
-                .email(userDao.getEmail())
-                .password(userDao.getPassword())
+                .id(userEntity.getId())
+                .email(userEntity.getEmail())
+                .password(userEntity.getPassword())
                 .build();
     }
 
-    public UserDao userToDao(UserDto userDto) {
-        return UserDao.builder()
+    public UserEntity userToDao(UserDto userDto) {
+        return UserEntity.builder()
                 .id(userDto.getId())
                 .email(userDto.getEmail())
                 .password(userDto.getPassword())

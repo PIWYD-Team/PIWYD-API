@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Entity
 @Table(name = "user")
-public class UserDao {
+public class UserEntity {
 
     @Id
     @GeneratedValue
