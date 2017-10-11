@@ -23,15 +23,21 @@ public class FaceServiceImpl implements FaceService {
     @Value("${face-recognition.app.key}")
     private String KEY;
 
-    public ResponseEntity registryNewFace(String fileBase64, Long idUser) {
+    private HttpHeaders getHeaders() {
+		HttpHeaders httpHeaders = new HttpHeaders();
+
+		httpHeaders.setContentType(APPLICATION_JSON);
+		httpHeaders.set("app_id", ID);
+		httpHeaders.set("app_key", KEY);
+
+		return httpHeaders;
+	}
+
+	@Override
+    public ResponseEntity registerNewFace(String fileBase64, Long idUser) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(APPLICATION_JSON);
-        httpHeaders.set("app_id", ID);
-        httpHeaders.set("app_key", KEY);
-
+		HttpHeaders httpHeaders = getHeaders();
         FaceImage faceImage = new FaceImage(fileBase64, String.valueOf(idUser));
-
         HttpEntity<FaceImage> httpEntity = new HttpEntity<>(faceImage, httpHeaders);
 
         String urlComplete = URL + "/enroll";
@@ -44,4 +50,17 @@ public class FaceServiceImpl implements FaceService {
 
         return restTemplate.exchange(uri, POST, httpEntity, String.class);
     }
+
+    @Override
+    public ResponseEntity<String> verifyUserFace(String fileBase64, Long idUser) {
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders httpHeaders = getHeaders();
+
+		FaceImage faceImage = new FaceImage(fileBase64, String.valueOf(idUser));
+		HttpEntity<FaceImage> httpEntity = new HttpEntity<>(faceImage, httpHeaders);
+
+		String urlComplete = URL + "/verify";
+
+		return restTemplate.exchange(urlComplete, POST, httpEntity, String.class);
+	}
 }

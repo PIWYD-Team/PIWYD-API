@@ -1,6 +1,5 @@
 package com.piwyd.user.face;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

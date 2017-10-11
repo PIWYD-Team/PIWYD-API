@@ -39,14 +39,11 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
             throws AuthenticationException, IOException, ServletException {
 
-        Credential credential =new ObjectMapper()
-                .readValue(req.getInputStream(), Credential.class);
+		boolean result = false;
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(8);
+        Credential credential = new ObjectMapper().readValue(req.getInputStream(), Credential.class);
 
-        this.userEntity = userRepository.findByEmail(credential.getUsername());
-
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(8);
-
-        boolean result = false;
+        userEntity = userRepository.findByEmail(credential.getUsername());
 
         if(userEntity != null) {
             result = passwordEncoder.matches(credential.getPassword(), userEntity.getPassword());
@@ -67,6 +64,7 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
                                             FilterChain chain, Authentication auth) throws IOException, ServletException {
-
+		// Generate token when successful login
+		TokenAuthenticationService.addAuthentication(res, userEntity, (short) 0);
     }
 }

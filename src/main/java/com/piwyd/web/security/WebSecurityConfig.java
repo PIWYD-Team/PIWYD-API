@@ -1,6 +1,7 @@
 package com.piwyd.web.security;
 
 import com.piwyd.user.UserRepository;
+import com.piwyd.user.face.FaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+	private FaceService faceService;
+
     @Bean
     CorsFilter corsFilter() {
         return new CorsFilter();
@@ -34,9 +38,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/api/users").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                // We filter the api/login requests
+                // We filter the /login requests
                 .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository),
                         UsernamePasswordAuthenticationFilter.class)
+                // We filter the /loginFace requests
+                .addFilterBefore(new JWTLoginFaceFilter("/loginFace", authenticationManager(), faceService),
+						UsernamePasswordAuthenticationFilter.class)
                 // And filter other requests to check the presence of JWT in header
                 .addFilterBefore(new JWTAuthenticationFilter(),
                         UsernamePasswordAuthenticationFilter.class);

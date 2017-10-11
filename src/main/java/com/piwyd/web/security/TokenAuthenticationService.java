@@ -15,10 +15,12 @@ import static java.util.Collections.emptyList;
 
 public class TokenAuthenticationService {
 
-    static final long EXPIRATIONTIME = 86_400_000; // one day in millisecond
-    static final String SECRET = "ThomasVincentRobin";
-    static final String TOKEN_PREFIX = "Bearer";
-    static final String HEADER_STRING = "Authorization";
+    private static final long EXPIRATIONTIME = 86_400_000; // one day in millisecond
+    private static final String SECRET = "ThomasVincentRobin";
+    private static final String TOKEN_PREFIX = "Bearer";
+    private static final String HEADER_STRING = "Authorization";
+    private static final String USER_TOKEN_KEY = "user";
+    private static final String AUTH_STATUS_TOKEN_KEY = "authenticationStatus";
 
     private static byte[] getSecretKey() {
         byte[] secret;
@@ -37,11 +39,12 @@ public class TokenAuthenticationService {
      * @param res
      * @param userEntity
      */
-    public static void addAuthentication(HttpServletResponse res, UserEntity userEntity) {
+    public static void addAuthentication(HttpServletResponse res, UserEntity userEntity, short authenticationStatus) {
         userEntity.setPassword("");
 
         String JWT = Jwts.builder()
-                .claim("user", userEntity)
+                .claim(USER_TOKEN_KEY, userEntity)
+				.claim(AUTH_STATUS_TOKEN_KEY, authenticationStatus)
                 .setSubject(userEntity.getEmail())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                 .signWith(SignatureAlgorithm.HS512, getSecretKey())
@@ -59,6 +62,7 @@ public class TokenAuthenticationService {
         if (token != null) {
             // parse the token.
             String user = Jwts.parser()
+					.require(AUTH_STATUS_TOKEN_KEY, 1)
                     .setSigningKey(getSecretKey())
                     .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
                     .getBody()
@@ -70,4 +74,21 @@ public class TokenAuthenticationService {
         }
         return null;
     }
+
+    public static UserEntity getUserFromToken(HttpServletRequest request) {
+		String token = request.getHeader(HEADER_STRING);
+		UserEntity user = null;
+
+		if (token != null) {
+			// parse the token.
+			user = (UserEntity) Jwts.parser()
+					.require(AUTH_STATUS_TOKEN_KEY, 0)
+					.setSigningKey(getSecretKey())
+					.parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+					.getBody()
+					.get(USER_TOKEN_KEY);
+		}
+
+		return user;
+	}
 }
