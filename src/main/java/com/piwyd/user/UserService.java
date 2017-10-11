@@ -11,7 +11,7 @@ public interface UserService {
 
     UserDto addUser(UserDto userDto) throws EmailAddressAlreadyExistsException;
 
-    UserDto getUserById(Long id);
+    UserDto getUserById(Long id) throws UserNotFoundException;
 
     UserDto getUserByEmail(String email);
 

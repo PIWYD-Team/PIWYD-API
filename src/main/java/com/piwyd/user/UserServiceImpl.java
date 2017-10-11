@@ -1,6 +1,8 @@
 package com.piwyd.user;
 
+import com.piwyd.user.face.FaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +19,7 @@ public class UserServiceImpl implements UserService {
     UserAdapter userAdapter;
 
     @Autowired
-
+    FaceService faceService;
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -37,16 +39,21 @@ public class UserServiceImpl implements UserService {
         UUID userId = UUID.randomUUID();
         userDto.setId(userId.getMostSignificantBits());
 
+        ResponseEntity responseEntity = faceService.registryNewFace(userDto.getFile(), userDto.getId());
+
         UserEntity newUser = userAdapter.userToDao(userDto);
         newUser = userRepository.save(newUser);
         return userAdapter.userToDto(newUser);
     }
 
     @Override
-    public UserDto getUserById(Long id) {
+    public UserDto getUserById(Long id) throws UserNotFoundException {
         UserEntity userEntity = userRepository.findById(id);
-        UserDto userDto = userAdapter.userToDto(userEntity);
-        return userDto;
+
+        if (userEntity == null) {
+            throw new UserNotFoundException();
+        }
+        return userAdapter.userToDto(userEntity);
     }
 
     @Override

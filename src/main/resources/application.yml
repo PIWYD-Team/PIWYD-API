@@ -1,0 +1,9 @@
+spring:
+  jpa:
+    database: h2
+
+face-recognition:
+  url : https://api.kairos.com
+  app:
+    id: b5309687
+    key: 1860f862acd1dc91ada5531b94a5281d
