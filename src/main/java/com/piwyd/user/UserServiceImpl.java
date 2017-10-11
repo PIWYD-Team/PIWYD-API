@@ -3,6 +3,7 @@ package com.piwyd.user;
 import com.piwyd.user.face.FaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,17 +33,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) throws EmailAddressAlreadyExistsException {
-
         if (checkUserAlreadyExist(userDto))
             throw new EmailAddressAlreadyExistsException(userDto.getEmail());
 
-        UUID userId = UUID.randomUUID();
-        userDto.setId(userId.getMostSignificantBits());
-
-        ResponseEntity responseEntity = faceService.registryNewFace(userDto.getFile(), userDto.getId());
-
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(8);
         UserEntity newUser = userAdapter.userToDao(userDto);
+        newUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
         newUser = userRepository.save(newUser);
+
+        ResponseEntity responseEntity = faceService.registryNewFace(userDto.getFile(), newUser.getId());
+
         return userAdapter.userToDto(newUser);
     }
 
