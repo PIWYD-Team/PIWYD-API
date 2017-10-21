@@ -30,7 +30,7 @@ public class CipherBlockChaining {
 		this.inputFile = new File(filename);
 
 		if(task == ENCRYPTION) {
-			this.outputFilename = inputFile.getName() + ".enc";
+			this.outputFilename = inputFile.getName() + ENCRYPTION_EXTENSION;
 		} else {
 			this.outputFilename = getDecryptedFilename(inputFile.getName());
 		}
@@ -41,9 +41,9 @@ public class CipherBlockChaining {
 		FileInputStream fileInputStream = new FileInputStream(inputFile);
 		FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
 
-		byte[] hashPwdBytes = hashedPassword.getBytes();
+		byte[] hashedPwdBytes = hashedPassword.getBytes();
 		byte[] last = INIT_VECTOR.getBytes();
-		byte[] buffer = new byte[hashedPassword.length()];
+		byte[] buffer = new byte[hashedPwdBytes.length];
 		int nbBytesRead;
 
 		try {
@@ -52,10 +52,10 @@ public class CipherBlockChaining {
 				byte[] processedBytes;
 
 				if (ENCRYPTION == task) {
-					processedBytes = xorBytesArrays(xorBytesArrays(chunk, last), hashPwdBytes);
+					processedBytes = xorByteArrays(xorByteArrays(chunk, last), hashedPwdBytes);
 					last = processedBytes;
 				} else if (DECRYPTION == task) {
-					processedBytes = xorBytesArrays(xorBytesArrays(chunk, hashPwdBytes), last);
+					processedBytes = xorByteArrays(xorByteArrays(chunk, hashedPwdBytes), last);
 					last = chunk;
 				} else {
 					throw new IllegalArgumentException("Unknown task of CBC");
@@ -81,7 +81,7 @@ public class CipherBlockChaining {
 	 * @param seq2 second byte array
 	 * @return the xored byte array of the 2 input byte arrays
 	 */
-	private byte[] xorBytesArrays(byte[] seq1, byte[] seq2) {
+	private byte[] xorByteArrays(byte[] seq1, byte[] seq2) {
 		int length = (seq1.length > seq2.length) ? seq2.length : seq1.length;
 		byte[] result = new byte[length];
 
