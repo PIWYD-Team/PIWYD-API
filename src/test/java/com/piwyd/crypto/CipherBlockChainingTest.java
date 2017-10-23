@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,7 +57,7 @@ public class CipherBlockChainingTest {
 
 			// Delete the original file
 			if(!new File(FILENAME).delete()) {
-				fail("An error occurred while deleting the original file");
+				fail("An error occurred while renaming the original file");
 			}
 
 			// Decrypt the file
@@ -73,7 +74,7 @@ public class CipherBlockChainingTest {
 
 			assertEquals("Nb bytes", expected.length, nbBytesRead);
 			assertArrayEquals("Compare byte arrays", FILE_CONTENT.getBytes(), Arrays.copyOf(buffer, nbBytesRead));
-		} catch (IOException e) {
+		} catch (IOException | NoSuchAlgorithmException e) {
 			e.printStackTrace();
 			fail("An unexpected exception has been thrown...");
 		} finally {

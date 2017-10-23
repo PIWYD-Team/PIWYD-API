@@ -1,8 +1,8 @@
 package com.piwyd.crypto;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import static com.piwyd.crypto.CipherBlockChaining.CBCTask.DECRYPTION;
@@ -15,17 +15,24 @@ public class CipherBlockChaining {
 		DECRYPTION
 	}
 
-	private static final String INIT_VECTOR = "DEFAULT INITIALIZING VECTOR";
+	/**
+	 * The length of the INIT_VECTOR should be equal or greater than the hashed password length.
+	 * For MD5 hashed password, the length must be at least 16 bytes
+	 */
+	private static final String INIT_VECTOR = "my init vectorAA";
+	private static final String PASSWORD = "Default password 12345$";
 	private static final String ENCRYPTION_EXTENSION = ".enc";
 
 	private CBCTask task;
-	private String hashedPassword;
+	private byte[] hashedPwdBytes;
 	private File inputFile;
 	private String outputFilename;
 
-	public CipherBlockChaining(final CBCTask task, final String filename) {
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(8);
-		this.hashedPassword = passwordEncoder.encode("DEFAULT PASSWORD 12345$");
+	public CipherBlockChaining(final CBCTask task, final String filename) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		//BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(8);
+		//this.hashedPassword = passwordEncoder.encode("");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		this.hashedPwdBytes = md.digest(PASSWORD.getBytes("utf-8"));
 		this.task = task;
 		this.inputFile = new File(filename);
 
@@ -36,13 +43,12 @@ public class CipherBlockChaining {
 		}
 	}
 
-	public void process() throws FileNotFoundException {
+	public void process() throws FileNotFoundException, UnsupportedEncodingException {
 		File outputFile = new File(outputFilename);
 		FileInputStream fileInputStream = new FileInputStream(inputFile);
 		FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
 
-		byte[] hashedPwdBytes = hashedPassword.getBytes();
-		byte[] last = INIT_VECTOR.getBytes();
+		byte[] last = INIT_VECTOR.getBytes("utf-8");
 		byte[] buffer = new byte[hashedPwdBytes.length];
 		int nbBytesRead;
 
@@ -56,7 +62,7 @@ public class CipherBlockChaining {
 					last = processedBytes;
 				} else if (DECRYPTION == task) {
 					processedBytes = xorByteArrays(xorByteArrays(chunk, hashedPwdBytes), last);
-					last = chunk;
+					last = Arrays.copyOf(chunk, chunk.length);
 				} else {
 					throw new IllegalArgumentException("Unknown task of CBC");
 				}
@@ -99,7 +105,7 @@ public class CipherBlockChaining {
 	 * @return the filename of the file before encryption
 	 */
 	private String getDecryptedFilename(String filename) {
-		if(!filename.endsWith(ENCRYPTION_EXTENSION)) {
+		if (!filename.endsWith(ENCRYPTION_EXTENSION)) {
 			return null;
 		}
 
