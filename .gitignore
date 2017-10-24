@@ -25,3 +25,7 @@ nbdist/
 
 ### Storage Directory ####
 upload
+
+### Apple file ###
+*.DS_Store
+
