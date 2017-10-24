@@ -1,3 +1,8 @@
+
+application:
+  name: piwyd-api
+  file-storage-path: upload
+
 spring:
   jpa:
     database: h2
