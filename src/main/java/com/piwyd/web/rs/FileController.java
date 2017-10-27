@@ -1,20 +1,19 @@
 package com.piwyd.web.rs;
 
-import com.piwyd.file.FileDto;
-import com.piwyd.file.FileService;
-import com.piwyd.web.rs.form.FileTransfert;
+import com.piwyd.file.*;
+import com.piwyd.file.FileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 
 @RestController
 @RequestMapping("/api/files")
@@ -23,35 +22,42 @@ public class FileController {
     private Logger logger = LoggerFactory.getLogger(FileController.class);
 
     @Autowired
-    FileService fileService;
+    private FileService fileService;
 
-    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping("/upload")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public FileDto uploadFile(@RequestBody @Valid FileTransfert fileTransfert) throws IOException {
-
-        FileDto newFile = fileService.addFile(fileTransfert.getFile(),
-                FileDto.builder()
-                        .fileName(fileTransfert.getFileName())
-                        .idOwner(fileTransfert.getIdOwner())
-                        .build());
-
-        return newFile;
+    public FileDto uploadFile(@RequestParam("file") MultipartFile file) throws IOException, NoSuchAlgorithmException {
+        return fileService.addFile(file);
     }
 
     @GetMapping("/{fileId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public FileDto getUser(@PathVariable("fileId") Long id) {
-        final FileDto fileById = fileService.getFileById(id);
-        return fileById;
+    public FileDto getFile(@PathVariable("fileId") Long id) throws FileNotFoundException {
+        return fileService.getFileById(id);
     }
 
     @GetMapping("/users/{userId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public List<FileDto> getFiles(@PathVariable("userId") Long id) {
-        List<FileDto> filesByUser = fileService.getAllFilesByUser(id);
-        return filesByUser;
+        return fileService.getAllFilesByUser(id);
+    }
+
+    @GetMapping("download/{fileId}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public void downloadFile(@PathVariable("fileId") Long id,HttpServletResponse response) throws IOException, NoSuchAlgorithmException, com.piwyd.file.FileNotFoundException {
+        final InputStream inputStream = fileService.getFileForDownload(id);
+        final FileDto file = fileService.getFileById(id);
+        response.setHeader("Content-Disposition", "attachment; filename=" + file.getFileName());
+        FileCopyUtils.copy(inputStream, response.getOutputStream());
+    }
+
+    @DeleteMapping(value = "/{fileId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFile(@PathVariable("fileId") Long id) throws FileNotFoundException {
+        fileService.removeFile(id);
     }
 }

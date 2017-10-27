@@ -19,7 +19,6 @@ import javax.validation.constraints.Size;
 public class FileEntity {
 
     @Id
-    @GeneratedValue
     private Long id;
 
     @Column

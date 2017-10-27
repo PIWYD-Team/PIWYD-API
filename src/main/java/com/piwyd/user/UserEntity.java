@@ -20,7 +20,6 @@ import javax.validation.constraints.NotNull;
 public class UserEntity {
 
     @Id
-    @GeneratedValue
     private Long id;
 
     @Column
@@ -37,4 +36,8 @@ public class UserEntity {
     @NotEmpty
     @Length(min = 8)
     private String password;
+
+    @Column
+    @NotNull
+    private String privateKey;
 }

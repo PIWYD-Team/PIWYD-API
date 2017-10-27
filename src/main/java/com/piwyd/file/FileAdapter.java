@@ -9,7 +9,6 @@ public class FileAdapter {
         return FileDto.builder()
                 .id(fileEntity.getId())
                 .fileName(fileEntity.getFileName())
-                .filePath(fileEntity.getFilePath())
                 .idOwner(fileEntity.getIdOwner())
                 .build();
     }
@@ -18,7 +17,6 @@ public class FileAdapter {
         return FileEntity.builder()
                 .id(fileDto.getId())
                 .fileName(fileDto.getFileName())
-                .filePath(fileDto.getFilePath())
                 .idOwner(fileDto.getIdOwner())
                 .build();
     }

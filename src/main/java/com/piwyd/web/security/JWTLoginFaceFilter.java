@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -29,6 +31,9 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 	private UserEntity userEntity;
 
 	private FaceService faceService;
+
+	@Autowired
+	private HttpSession httpSession;
 
 	public JWTLoginFaceFilter(String url, AuthenticationManager authManager, FaceService faceService) {
 		super(new AntPathRequestMatcher(url));
@@ -55,6 +60,7 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 			double confidence = getUserConfidence(body);
 
 			if (0.6 < confidence) {
+				httpSession.setAttribute("userId", userEntity.getId());
 				return new UsernamePasswordAuthenticationToken(
 						userEntity.getEmail(),
 						"",

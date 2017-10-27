@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileTransfert {
-    public byte[] file;
+public class FileInfo {
     private String fileName;
     private Long idOwner;
 }

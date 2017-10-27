@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -14,21 +15,20 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    UserAdapter userAdapter;
+    private UserAdapter userAdapter;
 
     @Autowired
-    FaceService faceService;
+    private FaceService faceService;
 
     @Override
     public List<UserDto> getAllUsers() {
-        List<UserDto> listUsers = userRepository.findAll()
+        return userRepository.findAll()
                 .stream()
                 .map(u -> userAdapter.userToDto(u))
                 .collect(Collectors.toList());
-        return listUsers;
     }
 
     @Override
@@ -38,7 +38,11 @@ public class UserServiceImpl implements UserService {
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(8);
         UserEntity newUser = userAdapter.userToDao(userDto);
+        newUser.setId(UUID.randomUUID().getMostSignificantBits());
         newUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
+        String privateKey = generatePrivateKey();
+        newUser.setPrivateKey(privateKey);
 
         newUser = userRepository.save(newUser);
 
@@ -83,5 +87,10 @@ public class UserServiceImpl implements UserService {
         if (userByEmail != null)
             return true;
         return false;
+    }
+
+    private String generatePrivateKey() {
+        Long aLong = new Random().nextLong();
+        return Long.toString(aLong, 16);
     }
 }
