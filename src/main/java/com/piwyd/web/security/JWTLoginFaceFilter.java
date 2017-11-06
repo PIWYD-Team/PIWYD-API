@@ -20,7 +20,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.Collections;
+import java.util.Scanner;
 
 public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -79,8 +82,11 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 	}
 
 	private String getFileData(HttpServletRequest request) throws IOException {
-		JSONObject jsonObject = new JSONObject(request.getInputStream());
-		return jsonObject.getString("file");
+		final String data = getStringFromReader(request.getReader());
+		JSONObject jsonObject = new JSONObject(data);
+		final String picture = jsonObject.getString("picture");
+
+		return picture.substring(picture.indexOf(',') + 1);
 	}
 
 	private double getUserConfidence(String jsonResult) {
@@ -88,5 +94,17 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 		JSONObject transaction = images.getJSONObject(0);
 
 		return transaction.getDouble("confidence");
+	}
+
+	private String getStringFromReader(Reader reader) throws IOException {
+		char[] arr = new char[8 * 1024];
+		StringBuilder buffer = new StringBuilder();
+		int numCharsRead;
+
+		while ((numCharsRead = reader.read(arr, 0, arr.length)) != -1) {
+			buffer.append(arr, 0, numCharsRead);
+		}
+
+		return buffer.toString();
 	}
 }
