@@ -1,0 +1,29 @@
+# Database configuration
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+    database: mysql
+  datasource:
+    url: jdbc:mysql://localhost:3306/piwyd
+    username: root
+    password: root
+    driverClassName: com.mysql.jdbc.Driver
+
+face-recognition:
+  url: https://api.kairos.com
+  app:
+    id: b5309687
+    key: 1860f862acd1dc91ada5531b94a5281d
+
+# HTTPS Configuration
+#server:
+#  port: 8443
+#  ssl:
+#    key-store: keystore.p12
+#    key-store-password: 270195Boy77
+#    keyStoreType: PKCS12
+#    keyAlias: tomcat

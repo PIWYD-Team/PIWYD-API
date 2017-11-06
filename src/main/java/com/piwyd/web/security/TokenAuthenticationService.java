@@ -39,7 +39,7 @@ public class TokenAuthenticationService {
      * @param res
      * @param userEntity
      */
-    public static void addAuthentication(HttpServletResponse res, UserEntity userEntity, short authenticationStatus) {
+    public static void addAuthentication(HttpServletResponse res, UserEntity userEntity, AuthState authenticationStatus) {
         userEntity.setPassword("");
 
         String JWT = Jwts.builder()
@@ -62,7 +62,7 @@ public class TokenAuthenticationService {
         if (token != null) {
             // parse the token.
             String user = Jwts.parser()
-					.require(AUTH_STATUS_TOKEN_KEY, 1)
+					.require(AUTH_STATUS_TOKEN_KEY, AuthState.FULL_AUTH)
                     .setSigningKey(getSecretKey())
                     .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
                     .getBody()
@@ -82,7 +82,7 @@ public class TokenAuthenticationService {
 		if (token != null) {
 			// parse the token.
 			user = (UserEntity) Jwts.parser()
-					.require(AUTH_STATUS_TOKEN_KEY, 0)
+					.require(AUTH_STATUS_TOKEN_KEY, AuthState.FIRST_STEP_AUTH)
 					.setSigningKey(getSecretKey())
 					.parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
 					.getBody()

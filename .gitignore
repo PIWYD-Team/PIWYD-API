@@ -25,3 +25,6 @@ nbdist/
 
 ### Apple file ###
 *.DS_Store
+
+mysql-connector-java-5.1.44-bin.jar
+src/test/java/com/restful/

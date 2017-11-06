@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
         newUser = userRepository.save(newUser);
 
-        ResponseEntity responseEntity = faceService.registerNewFace(userDto.getFile(), newUser.getId());
+        // ResponseEntity responseEntity = faceService.registerNewFace(userDto.getFile(), newUser.getId());
 
         return userAdapter.userToDto(newUser);
     }

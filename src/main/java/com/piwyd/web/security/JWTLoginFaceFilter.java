@@ -75,7 +75,7 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
 											FilterChain chain, Authentication auth) throws IOException, ServletException {
 		// Generate token when successful login
-		TokenAuthenticationService.addAuthentication(res, userEntity, (short) 1);
+		TokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FULL_AUTH);
 	}
 
 	private String getFileData(HttpServletRequest request) throws IOException {
