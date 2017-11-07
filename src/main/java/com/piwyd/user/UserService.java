@@ -1,15 +1,15 @@
 package com.piwyd.user;
 
+import com.piwyd.user.face.KairosAPIException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface UserService {
 
-    @Transactional(readOnly = true)
     List<UserDto> getAllUsers();
 
-    UserDto addUser(UserDto userDto) throws EmailAddressAlreadyExistsException;
+    UserDto addUser(UserDto userDto) throws EmailAddressAlreadyExistsException, KairosAPIException;
 
     UserDto getUserById(Long id) throws UserNotFoundException;
 

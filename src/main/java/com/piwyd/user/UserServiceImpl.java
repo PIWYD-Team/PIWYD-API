@@ -1,10 +1,15 @@
 package com.piwyd.user;
 
 import com.piwyd.user.face.FaceService;
+import com.piwyd.user.face.KairosAPIException;
+import com.piwyd.web.security.JWTLoginFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +28,7 @@ public class UserServiceImpl implements UserService {
     FaceService faceService;
 
     @Override
+	@Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         List<UserDto> listUsers = userRepository.findAll()
                 .stream()
@@ -32,7 +38,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto addUser(UserDto userDto) throws EmailAddressAlreadyExistsException {
+	@Transactional(rollbackFor = Exception.class)
+    public UserDto addUser(UserDto userDto) throws EmailAddressAlreadyExistsException, KairosAPIException {
         if (checkUserAlreadyExist(userDto))
             throw new EmailAddressAlreadyExistsException(userDto.getEmail());
 
@@ -42,9 +49,9 @@ public class UserServiceImpl implements UserService {
 
         newUser = userRepository.save(newUser);
 
-        // ResponseEntity responseEntity = faceService.registerNewFace(userDto.getFile(), newUser.getId());
+		faceService.registerNewFace(userDto.getPicture(), newUser.getId());
 
-        return userAdapter.userToDto(newUser);
+		return userAdapter.userToDto(newUser);
     }
 
     @Override

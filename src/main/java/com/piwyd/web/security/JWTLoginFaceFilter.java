@@ -2,6 +2,7 @@ package com.piwyd.web.security;
 
 import com.piwyd.user.UserEntity;
 import com.piwyd.user.face.FaceService;
+import com.piwyd.user.face.KairosAPIException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -51,10 +52,8 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 			return null;
 		}
 
-		ResponseEntity<String> responseEntity = faceService.verifyUserFace(base64File, userEntity.getId());
-
-		if (responseEntity.getStatusCode() == HttpStatus.OK) {
-			String body = responseEntity.getBody();
+		try {
+			String body = faceService.verifyUserFace(base64File, userEntity.getId());
 			double confidence = getUserConfidence(body);
 
 			if (0.6 < confidence) {
@@ -63,12 +62,11 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 						"",
 						Collections.emptyList());
 			} else {
-				logger.info("Kairos API call, confidence rate : ", confidence);
+				logger.info("Kairos API call, confidence rate : " + confidence);
 				httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Ta face n'a pas été reconnue, trou du cul ! (tu noteras la petite rime ^^");
 			}
-		} else {
-			logger.warn("Kairos API call, response status : ", responseEntity.getStatusCode());
-			httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Une erreur technique est survenue");
+		} catch (KairosAPIException e) {
+			httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 		}
 
 		return null;
@@ -90,10 +88,11 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 	}
 
 	private double getUserConfidence(String jsonResult) {
-		JSONArray images = new JSONArray(jsonResult);
-		JSONObject transaction = images.getJSONObject(0);
-
-		return transaction.getDouble("confidence");
+		return new JSONObject(jsonResult)
+				.getJSONArray("images")
+				.getJSONObject(0)
+				.getJSONObject("transaction")
+				.getDouble("confidence");
 	}
 
 	private String getStringFromReader(Reader reader) throws IOException {

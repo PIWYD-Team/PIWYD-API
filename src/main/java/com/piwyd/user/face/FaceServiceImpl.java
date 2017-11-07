@@ -1,18 +1,20 @@
 package com.piwyd.user.face;
 
+import com.piwyd.web.security.JWTLoginFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
 public class FaceServiceImpl implements FaceService {
+
+	private static final Logger logger = LoggerFactory.getLogger(JWTLoginFilter.class);
 
     @Value("${face-recognition.url}")
     private String URL;
@@ -34,33 +36,44 @@ public class FaceServiceImpl implements FaceService {
 	}
 
 	@Override
-    public ResponseEntity registerNewFace(String fileBase64, Long idUser) {
+    public void registerNewFace(String fileBase64, Long idUser) throws KairosAPIException {
         RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders httpHeaders = getHeaders();
         FaceImage faceImage = new FaceImage(fileBase64, String.valueOf(idUser));
         HttpEntity<FaceImage> httpEntity = new HttpEntity<>(faceImage, httpHeaders);
 
         String urlComplete = URL + "/enroll";
-        URI uri = null;
-        try {
-            uri = new URI(urlComplete);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
 
-        return restTemplate.exchange(uri, POST, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(urlComplete, POST, httpEntity, String.class);
+
+		manageResponse(urlComplete, responseEntity);
     }
 
     @Override
-    public ResponseEntity<String> verifyUserFace(String fileBase64, Long idUser) {
+    public String verifyUserFace(String fileBase64, Long idUser) throws KairosAPIException {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders httpHeaders = getHeaders();
-
 		FaceImage faceImage = new FaceImage(fileBase64, String.valueOf(idUser));
 		HttpEntity<FaceImage> httpEntity = new HttpEntity<>(faceImage, httpHeaders);
 
 		String urlComplete = URL + "/verify";
 
-		return restTemplate.exchange(urlComplete, POST, httpEntity, String.class);
+		ResponseEntity<String> responseEntity = restTemplate.exchange(urlComplete, POST, httpEntity, String.class);
+
+		manageResponse(urlComplete, responseEntity);
+
+		return responseEntity.getBody();
+	}
+
+	private void manageResponse(String url, ResponseEntity<String> responseEntity) throws KairosAPIException {
+		String body = responseEntity.getBody();
+
+		if (responseEntity.getStatusCode() != HttpStatus.OK) {
+			logger.warn("Kairos API call " + url + ", response status : " + responseEntity.getStatusCode());
+			throw new KairosAPIException("Une erreur technique est survenue");
+		} else if (body.contains("Errors")) {
+			logger.warn("Kairos API call " + url + ", response body : " + body);
+			throw new KairosAPIException(body);
+		}
 	}
 }
