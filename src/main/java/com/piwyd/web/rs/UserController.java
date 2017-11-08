@@ -1,6 +1,7 @@
 package com.piwyd.web.rs;
 
 import com.piwyd.user.*;
+import com.piwyd.user.face.KairosAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
-    private Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     UserService userService;
@@ -43,7 +42,7 @@ public class UserController {
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody @Valid  UserDto userDto, BindingResult bindingResult) throws EmailAddressAlreadyExistsException {
+    public UserDto createUser(@RequestBody @Valid  UserDto userDto, BindingResult bindingResult) throws EmailAddressAlreadyExistsException, KairosAPIException {
         if (bindingResult.hasErrors())
             throw new UserValidationException();
 

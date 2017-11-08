@@ -65,6 +65,6 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
                                             FilterChain chain, Authentication auth) throws IOException, ServletException {
 		// Generate token when successful login
-		TokenAuthenticationService.addAuthentication(res, userEntity, (short) 0);
+		TokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FIRST_STEP_AUTH);
     }
 }

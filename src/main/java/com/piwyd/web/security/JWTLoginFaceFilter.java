@@ -2,6 +2,7 @@ package com.piwyd.web.security;
 
 import com.piwyd.user.UserEntity;
 import com.piwyd.user.face.FaceService;
+import com.piwyd.user.face.KairosAPIException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -22,7 +23,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.Collections;
+import java.util.Scanner;
 
 public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -53,10 +57,8 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 			return null;
 		}
 
-		ResponseEntity<String> responseEntity = faceService.verifyUserFace(base64File, userEntity.getId());
-
-		if (responseEntity.getStatusCode() == HttpStatus.OK) {
-			String body = responseEntity.getBody();
+		try {
+			String body = faceService.verifyUserFace(base64File, userEntity.getId());
 			double confidence = getUserConfidence(body);
 
 			if (0.6 < confidence) {
@@ -66,12 +68,11 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 						"",
 						Collections.emptyList());
 			} else {
-				logger.info("Kairos API call, confidence rate : ", confidence);
+				logger.info("Kairos API call, confidence rate : " + confidence);
 				httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Ta face n'a pas été reconnue, trou du cul ! (tu noteras la petite rime ^^");
 			}
-		} else {
-			logger.warn("Kairos API call, response status : ", responseEntity.getStatusCode());
-			httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Une erreur technique est survenue");
+		} catch (KairosAPIException e) {
+			httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 		}
 
 		return null;
@@ -81,18 +82,34 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
 											FilterChain chain, Authentication auth) throws IOException, ServletException {
 		// Generate token when successful login
-		TokenAuthenticationService.addAuthentication(res, userEntity, (short) 1);
+		TokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FULL_AUTH);
 	}
 
 	private String getFileData(HttpServletRequest request) throws IOException {
-		JSONObject jsonObject = new JSONObject(request.getInputStream());
-		return jsonObject.getString("file");
+		final String data = getStringFromReader(request.getReader());
+		JSONObject jsonObject = new JSONObject(data);
+		final String picture = jsonObject.getString("picture");
+
+		return picture.substring(picture.indexOf(',') + 1);
 	}
 
 	private double getUserConfidence(String jsonResult) {
-		JSONArray images = new JSONArray(jsonResult);
-		JSONObject transaction = images.getJSONObject(0);
+		return new JSONObject(jsonResult)
+				.getJSONArray("images")
+				.getJSONObject(0)
+				.getJSONObject("transaction")
+				.getDouble("confidence");
+	}
 
-		return transaction.getDouble("confidence");
+	private String getStringFromReader(Reader reader) throws IOException {
+		char[] arr = new char[8 * 1024];
+		StringBuilder buffer = new StringBuilder();
+		int numCharsRead;
+
+		while ((numCharsRead = reader.read(arr, 0, arr.length)) != -1) {
+			buffer.append(arr, 0, numCharsRead);
+		}
+
+		return buffer.toString();
 	}
 }

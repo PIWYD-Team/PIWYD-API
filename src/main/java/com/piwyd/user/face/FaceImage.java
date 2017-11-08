@@ -9,12 +9,12 @@ public class FaceImage {
 
     private static final String GALLERY_NAME = "gallery1";
 
-    private String url;
+    private String image;
     private String subject_id;
     private String gallery_name;
 
     public FaceImage(String file, String idUser) {
-        this.url = file;
+        this.image = file;
         this.subject_id = idUser;
         this.gallery_name = GALLERY_NAME;
     }
