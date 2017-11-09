@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
@@ -29,19 +29,25 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private CBCService cbcService;
 
-    @Autowired
-    private HttpSession httpSession;
-
     @Value("${application.file-storage-path}")
     String storagePath;
+
+    @Value("${application.encryption-extension}")
+	String encryptionExtension;
 
     @Value("${spring.jpa.database}")
     String s;
 
     @Transactional
     @Override
-    public FileDto addFile(MultipartFile file) throws IOException, NoSuchAlgorithmException {
-        String fileName = file.getOriginalFilename();
+    public FileDto addFile(MultipartFile file, Long idUser) throws IOException, NoSuchAlgorithmException {
+        String filename = file.getOriginalFilename();
+        String path = storagePath + "/" + filename + encryptionExtension;
+        File newFile = new File(path);
+
+        if (newFile.exists()) {
+        	throw new InvalidParameterException("Un fichier avec le même nom existe déjà !");
+		}
 
         //todo remove commentaire, utiliser userPrivateKey en guise de password
         //String userPrivateKey = (String) httpSession.getAttribute("userPrivateKey");
@@ -49,20 +55,21 @@ public class FileServiceImpl implements FileService {
 
         byte[] process = cbcService.process(CBCServiceImpl.CBCTask.ENCRYPTION, userPrivateKey, file.getInputStream());
 
-        FileOutputStream fos = new FileOutputStream(storagePath + "/" + fileName + ".enc");
+        File uploadDir = new File(storagePath);
+        if (!uploadDir.exists() && !uploadDir.mkdir()) {
+        	throw new IOException("Une erreur technique est survenue");
+		}
+
+        FileOutputStream fos = new FileOutputStream(path);
         fos.write(process);
         fos.close();
-
-        //todo remove le commentaire -> idOwner
-        //Long userId = (Long) httpSession.getAttribute("userId");
-        Long userId = 1L;
 
         FileEntity entityRegistry = fileRepository.save(
                 FileEntity.builder()
                         .id(UUID.randomUUID().getMostSignificantBits())
-                        .fileName(fileName)
-                        .filePath(storagePath + "/" + fileName + ".enc")
-                        .idOwner(userId)
+                        .name(filename)
+                        .path(path)
+                        .idOwner(idUser)
                         .build());
 
         return fileAdapter.fileToDto(entityRegistry);
@@ -71,12 +78,12 @@ public class FileServiceImpl implements FileService {
     @Transactional
     @Override
     public InputStream getFileForDownload(Long id) throws IOException, NoSuchAlgorithmException, FileNotFoundException {
-        FileEntity fileEntity= fileRepository.findOneById(id);
+        FileEntity fileEntity = fileRepository.findOne(id);
         if (fileEntity == null) {
             throw new FileNotFoundException();
         }
 
-        File file = new File(fileEntity.getFilePath());
+        File file = new File(fileEntity.getPath());
         InputStream inputStream = new FileInputStream(file);
 
         //todo remove commentaire, utiliser la user.privateKey pour déchiffré ses fichiers
@@ -95,7 +102,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void removeFile(Long id) throws FileNotFoundException {
-        FileEntity fileEntity= fileRepository.findOneById(id);
+        FileEntity fileEntity= fileRepository.findOne(id);
         if (fileEntity == null) {
             throw new FileNotFoundException();
         }
@@ -106,7 +113,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<FileDto> getAllFilesByUser(Long id) {
         List<FileDto> filesByUser = fileRepository.findAllByIdOwner(id)
-                        .stream()
+				.stream()
                 .map(u -> fileAdapter.fileToDto(u))
                 .collect(Collectors.toList());
         return filesByUser;
@@ -115,7 +122,7 @@ public class FileServiceImpl implements FileService {
     @Transactional
     @Override
     public FileDto getFileById(Long id) throws FileNotFoundException {
-        FileEntity fileEntity = fileRepository.findOneById(id);
+        FileEntity fileEntity = fileRepository.findOne(id);
 
         if (fileEntity == null) {
             throw new FileNotFoundException();

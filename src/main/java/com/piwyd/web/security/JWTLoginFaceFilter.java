@@ -3,13 +3,10 @@ package com.piwyd.web.security;
 import com.piwyd.user.UserEntity;
 import com.piwyd.user.face.FaceService;
 import com.piwyd.user.face.KairosAPIException;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,32 +21,30 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.Collections;
-import java.util.Scanner;
 
 public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 
-	private static final Logger logger = LoggerFactory.getLogger(JWTLoginFilter.class);
+	private static final Logger logger = LoggerFactory.getLogger(JWTLoginFaceFilter.class);
 
 	private UserEntity userEntity;
 
 	private FaceService faceService;
 
-	@Autowired
-	private HttpSession httpSession;
+	private TokenAuthenticationService tokenAuthenticationService;
 
-	public JWTLoginFaceFilter(String url, AuthenticationManager authManager, FaceService faceService) {
+	public JWTLoginFaceFilter(String url, AuthenticationManager authManager, FaceService faceService, TokenAuthenticationService tokenAuthenticationService) {
 		super(new AntPathRequestMatcher(url));
 		setAuthenticationManager(authManager);
 
 		this.faceService = faceService;
+		this.tokenAuthenticationService = tokenAuthenticationService;
 		this.userEntity = null;
 	}
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws AuthenticationException, IOException, ServletException {
-		userEntity = TokenAuthenticationService.getUserFromToken(httpServletRequest);
+		userEntity = tokenAuthenticationService.getUserFromToken(httpServletRequest);
 		String base64File = getFileData(httpServletRequest);
 
 		if(userEntity == null) {
@@ -62,7 +57,6 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 			double confidence = getUserConfidence(body);
 
 			if (0.6 < confidence) {
-				httpSession.setAttribute("userId", userEntity.getId());
 				return new UsernamePasswordAuthenticationToken(
 						userEntity.getEmail(),
 						"",
@@ -82,7 +76,7 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
 											FilterChain chain, Authentication auth) throws IOException, ServletException {
 		// Generate token when successful login
-		TokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FULL_AUTH);
+		tokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FULL_AUTH);
 	}
 
 	private String getFileData(HttpServletRequest request) throws IOException {

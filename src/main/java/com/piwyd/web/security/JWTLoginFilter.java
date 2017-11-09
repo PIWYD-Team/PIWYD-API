@@ -26,12 +26,15 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
     private UserRepository userRepository;
 
+    private TokenAuthenticationService tokenAuthenticationService;
+
     private UserEntity userEntity;
 
-    public JWTLoginFilter(String url, AuthenticationManager authManager, UserRepository userRepository) {
+    public JWTLoginFilter(String url, AuthenticationManager authManager, UserRepository userRepository, TokenAuthenticationService tokenAuthenticationService) {
         super(new AntPathRequestMatcher(url));
         setAuthenticationManager(authManager);
         this.userRepository = userRepository;
+        this.tokenAuthenticationService = tokenAuthenticationService;
         this.userEntity = null;
     }
 
@@ -65,6 +68,6 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
                                             FilterChain chain, Authentication auth) throws IOException, ServletException {
 		// Generate token when successful login
-		TokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FIRST_STEP_AUTH);
+		tokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FIRST_STEP_AUTH);
     }
 }

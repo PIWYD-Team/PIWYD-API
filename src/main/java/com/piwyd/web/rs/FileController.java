@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -27,8 +28,10 @@ public class FileController {
     @PostMapping("/upload")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public FileDto uploadFile(@RequestParam("file") MultipartFile file) throws IOException, NoSuchAlgorithmException {
-        return fileService.addFile(file);
+    public FileDto uploadFile(@RequestParam("file") MultipartFile file, HttpSession httpSession) throws IOException, NoSuchAlgorithmException {
+		Long idUser = (Long) httpSession.getAttribute("userId");
+
+        return fileService.addFile(file, idUser);
     }
 
     @GetMapping("/{fileId}")
@@ -48,10 +51,10 @@ public class FileController {
     @GetMapping("download/{fileId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public void downloadFile(@PathVariable("fileId") Long id,HttpServletResponse response) throws IOException, NoSuchAlgorithmException, com.piwyd.file.FileNotFoundException {
+    public void downloadFile(@PathVariable("fileId") Long id, HttpServletResponse response) throws IOException, NoSuchAlgorithmException, com.piwyd.file.FileNotFoundException {
         final InputStream inputStream = fileService.getFileForDownload(id);
         final FileDto file = fileService.getFileById(id);
-        response.setHeader("Content-Disposition", "attachment; filename=" + file.getFileName());
+        response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
         FileCopyUtils.copy(inputStream, response.getOutputStream());
     }
 

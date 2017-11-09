@@ -8,7 +8,5 @@ import java.util.List;
 @Repository
 public interface FileRepository extends JpaRepository<FileEntity, Long> {
 
-    FileEntity findOneById(Long id);
-
     List<FileEntity> findAllByIdOwner(Long id);
 }

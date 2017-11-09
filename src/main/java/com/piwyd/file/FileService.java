@@ -16,7 +16,7 @@ public interface FileService {
 
     FileDto getFileById(Long id) throws com.piwyd.file.FileNotFoundException;
 
-    FileDto addFile(MultipartFile file) throws IOException, NoSuchAlgorithmException;
+    FileDto addFile(MultipartFile file, Long idUser) throws IOException, NoSuchAlgorithmException;
 
     InputStream getFileForDownload(Long id) throws IOException, NoSuchAlgorithmException, com.piwyd.file.FileNotFoundException;
 

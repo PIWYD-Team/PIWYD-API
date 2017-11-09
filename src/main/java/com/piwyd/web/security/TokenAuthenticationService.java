@@ -2,15 +2,20 @@ package com.piwyd.web.security;
 
 import com.piwyd.user.UserAdapter;
 import com.piwyd.user.UserEntity;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -18,6 +23,7 @@ import java.util.Map;
 
 import static java.util.Collections.emptyList;
 
+@Service
 public class TokenAuthenticationService {
 
     private static final long EXPIRATIONTIME = 86_400_000; // one day in millisecond
@@ -26,6 +32,9 @@ public class TokenAuthenticationService {
     private static final String HEADER_STRING = "Authorization";
     private static final String USER_TOKEN_KEY = "user";
     private static final String AUTH_STATUS_TOKEN_KEY = "authenticationStatus";
+
+    @Autowired
+    private HttpSession httpSession;
 
     private static byte[] getSecretKey() {
         byte[] secret;
@@ -44,7 +53,7 @@ public class TokenAuthenticationService {
      * @param res
      * @param userEntity
      */
-    public static void addAuthentication(HttpServletResponse res, UserEntity userEntity, AuthState authenticationStatus) {
+    public void addAuthentication(HttpServletResponse res, UserEntity userEntity, AuthState authenticationStatus) {
         userEntity.setPassword("");
 
         String JWT = Jwts.builder()
@@ -62,36 +71,47 @@ public class TokenAuthenticationService {
      * @param request
      * @return
      */
-    public static Authentication getAuthentication(HttpServletRequest request) {
+    public Authentication getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(HEADER_STRING);
         if (token != null) {
-            // parse the token.
-            String user = Jwts.parser()
+            // parse the token
+            Jws<Claims> claimsJws = Jwts.parser()
 					.require(AUTH_STATUS_TOKEN_KEY, AuthState.FULL_AUTH.ordinal())
                     .setSigningKey(getSecretKey())
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                    .getBody()
+                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""));
+
+            String subject = claimsJws
+					.getBody()
                     .getSubject();
 
-            return user != null ?
-                    new UsernamePasswordAuthenticationToken(user, null, emptyList()) :
+			UserEntity userEntity = getUser(claimsJws);
+			httpSession.setAttribute("userId", userEntity.getId());
+
+            return subject != null ?
+                    new UsernamePasswordAuthenticationToken(subject, null, emptyList()) :
                     null;
         }
         return null;
     }
 
-    public static UserEntity getUserFromToken(HttpServletRequest request) {
+    public UserEntity getUserFromToken(HttpServletRequest request) {
 		String token = request.getHeader(HEADER_STRING);
 
 		if (token == null) {
 			throw new AuthenticationCredentialsNotFoundException("Première étape de login non complétée");
 		}
 
-		// parse the token.
-		Map map = (Map) Jwts.parser()
+		Jws<Claims> claimsJws = Jwts.parser()
 				.require(AUTH_STATUS_TOKEN_KEY, AuthState.FIRST_STEP_AUTH.ordinal())
 				.setSigningKey(getSecretKey())
-				.parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+				.parseClaimsJws(token.replace(TOKEN_PREFIX, ""));
+
+		return getUser(claimsJws);
+	}
+
+	private UserEntity getUser(final Jws<Claims> claimsJws) {
+		// parse the token
+		Map map = (Map) claimsJws
 				.getBody()
 				.get(USER_TOKEN_KEY);
 

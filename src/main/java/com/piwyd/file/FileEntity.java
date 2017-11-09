@@ -24,11 +24,14 @@ public class FileEntity {
     @Column
     @NotEmpty
     @NotNull
-    private String fileName;
+    private String name;
 
     @Column
-    private String filePath;
+    @NotEmpty
+    @NotNull
+    private String path;
 
     @Column
+    @NotNull
     private Long idOwner;
 }

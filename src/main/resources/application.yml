@@ -1,8 +1,3 @@
-
-application:
-  name: piwyd-api
-  file-storage-path: upload
-
 spring:
   profiles:
     active: dev

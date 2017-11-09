@@ -19,6 +19,11 @@ face-recognition:
     id: b5309687
     key: 1860f862acd1dc91ada5531b94a5281d
 
+application:
+  name: piwyd-api
+  file-storage-path: upload
+  encryption-extension: .enc
+
 # HTTPS Configuration
 #server:
 #  port: 8443

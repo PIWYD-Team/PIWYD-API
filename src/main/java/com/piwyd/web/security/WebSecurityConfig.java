@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.SessionManagementFilter;
 
+import javax.servlet.http.HttpSession;
+
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -21,6 +23,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
 	private FaceService faceService;
+
+    @Autowired
+	private TokenAuthenticationService tokenAuthenticationService;
 
     @Bean
     CorsFilter corsFilter() {
@@ -39,13 +44,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
                 // We filter the /login requests
-                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository),
+                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository, tokenAuthenticationService),
                         UsernamePasswordAuthenticationFilter.class)
                 // We filter the /loginFace requests
-                .addFilterBefore(new JWTLoginFaceFilter("/loginFace", authenticationManager(), faceService),
+                .addFilterBefore(new JWTLoginFaceFilter("/loginFace", authenticationManager(), faceService, tokenAuthenticationService),
 						UsernamePasswordAuthenticationFilter.class)
                 // And filter other requests to check the presence of JWT in header
-                .addFilterBefore(new JWTAuthenticationFilter(),
+                .addFilterBefore(new JWTAuthenticationFilter(tokenAuthenticationService),
                         UsernamePasswordAuthenticationFilter.class);
     }
 }
