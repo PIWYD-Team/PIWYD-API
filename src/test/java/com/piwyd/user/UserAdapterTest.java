@@ -16,7 +16,7 @@ public class UserAdapterTest {
     @Test
     public void should_return_an_user_dao() {
         UserDto userDto  = UserDto.builder()
-                .id(1L)
+                .id("1")
                 .email("userName")
                 .password("azerty")
                 .build();

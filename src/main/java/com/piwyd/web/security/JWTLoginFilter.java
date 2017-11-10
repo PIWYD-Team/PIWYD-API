@@ -1,11 +1,13 @@
 package com.piwyd.web.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.piwyd.user.UserAdapter;
 import com.piwyd.user.UserEntity;
 import com.piwyd.user.UserRepository;
 import com.piwyd.web.security.domain.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,13 +30,16 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
     private TokenAuthenticationService tokenAuthenticationService;
 
+    private UserAdapter userAdapter;
+
     private UserEntity userEntity;
 
-    public JWTLoginFilter(String url, AuthenticationManager authManager, UserRepository userRepository, TokenAuthenticationService tokenAuthenticationService) {
+    public JWTLoginFilter(String url, AuthenticationManager authManager, UserRepository userRepository, TokenAuthenticationService tokenAuthenticationService, UserAdapter userAdapter) {
         super(new AntPathRequestMatcher(url));
         setAuthenticationManager(authManager);
         this.userRepository = userRepository;
         this.tokenAuthenticationService = tokenAuthenticationService;
+        this.userAdapter = userAdapter;
         this.userEntity = null;
     }
 
@@ -68,6 +73,6 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
                                             FilterChain chain, Authentication auth) throws IOException, ServletException {
 		// Generate token when successful login
-		tokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FIRST_STEP_AUTH);
+		tokenAuthenticationService.addAuthentication(res, userAdapter.userToDto(userEntity), AuthState.FIRST_STEP_AUTH);
     }
 }

@@ -1,5 +1,6 @@
 package com.piwyd.web.security;
 
+import com.piwyd.user.UserDto;
 import com.piwyd.user.UserEntity;
 import com.piwyd.user.face.FaceService;
 import com.piwyd.user.face.KairosAPIException;
@@ -27,7 +28,7 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 
 	private static final Logger logger = LoggerFactory.getLogger(JWTLoginFaceFilter.class);
 
-	private UserEntity userEntity;
+	private UserDto userDto;
 
 	private FaceService faceService;
 
@@ -39,26 +40,26 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 
 		this.faceService = faceService;
 		this.tokenAuthenticationService = tokenAuthenticationService;
-		this.userEntity = null;
+		this.userDto = null;
 	}
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws AuthenticationException, IOException, ServletException {
-		userEntity = tokenAuthenticationService.getUserFromToken(httpServletRequest);
+		userDto = tokenAuthenticationService.getUserFromToken(httpServletRequest);
 		String base64File = getFileData(httpServletRequest);
 
-		if(userEntity == null) {
+		if(userDto == null) {
 			httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Première étape de login non complétée");
 			return null;
 		}
 
 		try {
-			String body = faceService.verifyUserFace(base64File, userEntity.getId());
+			String body = faceService.verifyUserFace(base64File, Long.parseLong(userDto.getId()));
 			double confidence = getUserConfidence(body);
 
 			if (0.6 < confidence) {
 				return new UsernamePasswordAuthenticationToken(
-						userEntity.getEmail(),
+						userDto.getEmail(),
 						"",
 						Collections.emptyList());
 			} else {
@@ -76,7 +77,7 @@ public class JWTLoginFaceFilter extends AbstractAuthenticationProcessingFilter {
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res,
 											FilterChain chain, Authentication auth) throws IOException, ServletException {
 		// Generate token when successful login
-		tokenAuthenticationService.addAuthentication(res, userEntity, AuthState.FULL_AUTH);
+		tokenAuthenticationService.addAuthentication(res, userDto, AuthState.FULL_AUTH);
 	}
 
 	private String getFileData(HttpServletRequest request) throws IOException {

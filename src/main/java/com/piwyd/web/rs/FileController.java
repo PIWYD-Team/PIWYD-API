@@ -30,8 +30,9 @@ public class FileController {
     @ResponseStatus(HttpStatus.CREATED)
     public FileDto uploadFile(@RequestParam("file") MultipartFile file, HttpSession httpSession) throws IOException, NoSuchAlgorithmException {
 		Long idUser = (Long) httpSession.getAttribute("userId");
+		String userPrivateKey = (String) httpSession.getAttribute("userPrivateKey");
 
-        return fileService.addFile(file, idUser);
+        return fileService.addFile(file, idUser, userPrivateKey);
     }
 
     @GetMapping("/{fileId}")
@@ -51,8 +52,9 @@ public class FileController {
     @GetMapping("download/{fileId}")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    public void downloadFile(@PathVariable("fileId") Long id, HttpServletResponse response) throws IOException, NoSuchAlgorithmException, com.piwyd.file.FileNotFoundException {
-        final InputStream inputStream = fileService.getFileForDownload(id);
+    public void downloadFile(@PathVariable("fileId") Long id, HttpServletResponse response, HttpSession httpSession) throws IOException, NoSuchAlgorithmException, com.piwyd.file.FileNotFoundException {
+		String userPrivateKey = (String) httpSession.getAttribute("userPrivateKey");
+    	final InputStream inputStream = fileService.getFileForDownload(id, userPrivateKey);
         final FileDto file = fileService.getFileById(id);
         response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
         FileCopyUtils.copy(inputStream, response.getOutputStream());

@@ -1,6 +1,7 @@
 package com.piwyd.web.security;
 
 import com.piwyd.user.UserAdapter;
+import com.piwyd.user.UserDto;
 import com.piwyd.user.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -36,6 +37,9 @@ public class TokenAuthenticationService {
     @Autowired
     private HttpSession httpSession;
 
+    @Autowired
+	private UserAdapter userAdapter;
+
     private static byte[] getSecretKey() {
         byte[] secret;
 
@@ -51,15 +55,15 @@ public class TokenAuthenticationService {
     /**
      * Add the token in the header response
      * @param res
-     * @param userEntity
+     * @param userDto
      */
-    public void addAuthentication(HttpServletResponse res, UserEntity userEntity, AuthState authenticationStatus) {
-        userEntity.setPassword("");
+    public void addAuthentication(HttpServletResponse res, UserDto userDto, AuthState authenticationStatus) {
+        userDto.setPassword("");
 
         String JWT = Jwts.builder()
-                .claim(USER_TOKEN_KEY, userEntity)
+                .claim(USER_TOKEN_KEY, userDto)
 				.claim(AUTH_STATUS_TOKEN_KEY, authenticationStatus.ordinal())
-                .setSubject(userEntity.getEmail())
+                .setSubject(userDto.getEmail())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                 .signWith(SignatureAlgorithm.HS512, getSecretKey())
                 .compact();
@@ -84,8 +88,9 @@ public class TokenAuthenticationService {
 					.getBody()
                     .getSubject();
 
-			UserEntity userEntity = getUser(claimsJws);
-			httpSession.setAttribute("userId", userEntity.getId());
+			UserDto userDto = getUser(claimsJws);
+			httpSession.setAttribute("userId", Long.parseLong(userDto.getId()));
+			httpSession.setAttribute("userPrivateKey", userDto.getPrivateKey());
 
             return subject != null ?
                     new UsernamePasswordAuthenticationToken(subject, null, emptyList()) :
@@ -94,7 +99,7 @@ public class TokenAuthenticationService {
         return null;
     }
 
-    public UserEntity getUserFromToken(HttpServletRequest request) {
+    public UserDto getUserFromToken(HttpServletRequest request) {
 		String token = request.getHeader(HEADER_STRING);
 
 		if (token == null) {
@@ -109,12 +114,12 @@ public class TokenAuthenticationService {
 		return getUser(claimsJws);
 	}
 
-	private UserEntity getUser(final Jws<Claims> claimsJws) {
+	private UserDto getUser(final Jws<Claims> claimsJws) {
 		// parse the token
 		Map map = (Map) claimsJws
 				.getBody()
 				.get(USER_TOKEN_KEY);
 
-		return UserAdapter.mapToDao(map);
+		return userAdapter.mapToDto(map);
 	}
 }

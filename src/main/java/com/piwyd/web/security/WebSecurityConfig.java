@@ -1,5 +1,6 @@
 package com.piwyd.web.security;
 
+import com.piwyd.user.UserAdapter;
 import com.piwyd.user.UserRepository;
 import com.piwyd.user.face.FaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
 	private TokenAuthenticationService tokenAuthenticationService;
 
+    @Autowired
+	private UserAdapter userAdapter;
+
     @Bean
     CorsFilter corsFilter() {
         return new CorsFilter();
@@ -44,7 +48,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
                 // We filter the /login requests
-                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository, tokenAuthenticationService),
+                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository, tokenAuthenticationService, userAdapter),
                         UsernamePasswordAuthenticationFilter.class)
                 // We filter the /loginFace requests
                 .addFilterBefore(new JWTLoginFaceFilter("/loginFace", authenticationManager(), faceService, tokenAuthenticationService),

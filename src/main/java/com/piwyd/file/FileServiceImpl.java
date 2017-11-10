@@ -40,7 +40,7 @@ public class FileServiceImpl implements FileService {
 
     @Transactional
     @Override
-    public FileDto addFile(MultipartFile file, Long idUser) throws IOException, NoSuchAlgorithmException {
+    public FileDto addFile(MultipartFile file, Long idUser, String userPrivateKey) throws IOException, NoSuchAlgorithmException {
         String filename = file.getOriginalFilename();
         String path = storagePath + "/" + filename + encryptionExtension;
         File newFile = new File(path);
@@ -48,10 +48,6 @@ public class FileServiceImpl implements FileService {
         if (newFile.exists()) {
         	throw new InvalidParameterException("Un fichier avec le même nom existe déjà !");
 		}
-
-        //todo remove commentaire, utiliser userPrivateKey en guise de password
-        //String userPrivateKey = (String) httpSession.getAttribute("userPrivateKey");
-        String userPrivateKey = "Default password 12345$";
 
         byte[] process = cbcService.process(CBCServiceImpl.CBCTask.ENCRYPTION, userPrivateKey, file.getInputStream());
 
@@ -77,7 +73,7 @@ public class FileServiceImpl implements FileService {
 
     @Transactional
     @Override
-    public InputStream getFileForDownload(Long id) throws IOException, NoSuchAlgorithmException, FileNotFoundException {
+    public InputStream getFileForDownload(Long id, String userPrivateKey) throws IOException, NoSuchAlgorithmException, FileNotFoundException {
         FileEntity fileEntity = fileRepository.findOne(id);
         if (fileEntity == null) {
             throw new FileNotFoundException();
@@ -85,10 +81,6 @@ public class FileServiceImpl implements FileService {
 
         File file = new File(fileEntity.getPath());
         InputStream inputStream = new FileInputStream(file);
-
-        //todo remove commentaire, utiliser la user.privateKey pour déchiffré ses fichiers
-        //String userPrivateKey = (String) httpSession.getAttribute("userPrivateKey");
-        String userPrivateKey = "Default password 12345$";
 
         byte[] process = cbcService.process(CBCServiceImpl.CBCTask.DECRYPTION, userPrivateKey, inputStream);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(process);

@@ -9,27 +9,29 @@ public class UserAdapter {
 
     public UserDto userToDto(UserEntity userEntity) {
         return UserDto.builder()
-                .id(userEntity.getId())
+                .id(userEntity.getId().toString())
                 .email(userEntity.getEmail())
                 .password(userEntity.getPassword())
+				.privateKey(userEntity.getPrivateKey())
                 .build();
     }
 
     public UserEntity userToDao(UserDto userDto) {
         return UserEntity.builder()
-                .id(userDto.getId())
+                .id(Long.parseLong(userDto.getId()))
                 .email(userDto.getEmail())
                 .password(userDto.getPassword())
+				.privateKey(userDto.getPrivateKey())
                 .build();
     }
 
-    public static UserEntity mapToDao(Map<String, Object> map) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(((Integer) map.get("id")).longValue());
-        userEntity.setEmail((String) map.get("email"));
-        userEntity.setPassword((String) map.get("password"));
-        userEntity.setName((String) map.get("name"));
+    public UserDto mapToDto(Map<String, Object> map) {
+        UserDto userDto = new UserDto();
+		userDto.setId((String) map.get("id"));
+		userDto.setEmail((String) map.get("email"));
+		userDto.setPassword((String) map.get("password"));
+		userDto.setPrivateKey((String) map.get("privateKey"));
 
-        return userEntity;
+        return userDto;
     }
 }
