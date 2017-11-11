@@ -7,7 +7,6 @@ import com.piwyd.user.UserRepository;
 import com.piwyd.web.security.domain.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,22 +24,22 @@ import java.util.Collections;
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JWTLoginFilter.class);
+	private final boolean withNewPassword;
 
     private UserRepository userRepository;
-
     private TokenAuthenticationService tokenAuthenticationService;
-
     private UserAdapter userAdapter;
 
     private UserEntity userEntity;
 
-    public JWTLoginFilter(String url, AuthenticationManager authManager, UserRepository userRepository, TokenAuthenticationService tokenAuthenticationService, UserAdapter userAdapter) {
+    public JWTLoginFilter(String url, AuthenticationManager authManager, UserRepository userRepository, TokenAuthenticationService tokenAuthenticationService, UserAdapter userAdapter, boolean withNewPassword) {
         super(new AntPathRequestMatcher(url));
         setAuthenticationManager(authManager);
         this.userRepository = userRepository;
         this.tokenAuthenticationService = tokenAuthenticationService;
         this.userAdapter = userAdapter;
         this.userEntity = null;
+        this.withNewPassword = withNewPassword;
     }
 
     @Override
@@ -53,7 +52,7 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
         userEntity = userRepository.findByEmail(credential.getUsername());
 
-        if(userEntity != null) {
+        if (userEntity != null) {
             result = passwordEncoder.matches(credential.getPassword(), userEntity.getPassword());
         }
 
@@ -62,6 +61,21 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
             res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "L'adresse email ou le mot de passe est incorrect.");
             return null;
         }
+
+		if (withNewPassword) {
+			// Save the new password and update the user
+			userEntity.setPassword(passwordEncoder.encode(credential.getNewPassword()));
+			userEntity = userRepository.save(userEntity);
+
+			result = isPasswordValid(credential.getNewPassword());
+		} else {
+			result = isPasswordValid(credential.getPassword());
+		}
+
+		if (!result) {
+			logger.info("password doesn't match with password rules");
+			res.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, "Le mot de passe ne vérifie plus les règles exigées");
+		}
 
         return new UsernamePasswordAuthenticationToken(
                 credential.getUsername(),
@@ -75,4 +89,9 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 		// Generate token when successful login
 		tokenAuthenticationService.addAuthentication(res, userAdapter.userToDto(userEntity), AuthState.FIRST_STEP_AUTH);
     }
+
+    private boolean isPasswordValid(final String password) {
+		// TODO: Check validity of the password (expired, doesn't match with current password's rules)
+		return (password.length() > 4);
+	}
 }

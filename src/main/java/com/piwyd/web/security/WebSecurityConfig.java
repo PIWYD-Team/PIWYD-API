@@ -48,8 +48,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
                 // We filter the /login requests
-                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository, tokenAuthenticationService, userAdapter),
+                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository, tokenAuthenticationService, userAdapter, false),
                         UsernamePasswordAuthenticationFilter.class)
+				.addFilterBefore(new JWTLoginFilter("/loginNewPassword", authenticationManager(), userRepository, tokenAuthenticationService, userAdapter, true),
+						UsernamePasswordAuthenticationFilter.class)
                 // We filter the /loginFace requests
                 .addFilterBefore(new JWTLoginFaceFilter("/loginFace", authenticationManager(), faceService, tokenAuthenticationService),
 						UsernamePasswordAuthenticationFilter.class)
