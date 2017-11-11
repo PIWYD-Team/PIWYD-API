@@ -25,10 +25,9 @@ application:
   encryption-extension: .enc
 
 # HTTPS Configuration
-#server:
-#  port: 8443
-#  ssl:
-#    key-store: keystore.p12
-#    key-store-password: 270195Boy77
-#    keyStoreType: PKCS12
-#    keyAlias: tomcat
+server:
+  port: 8443
+  ssl:
+    key-store: piwyd.p12
+    key-store-password: piwydPassword2017
+    keyStoreType: PKCS12
