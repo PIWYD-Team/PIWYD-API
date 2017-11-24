@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 @Data
 @Builder
@@ -34,10 +35,12 @@ public class UserEntity {
     @Column
     @NotNull
     @NotEmpty
-    @Length(min = 8)
     private String password;
 
     @Column
     @NotNull
     private String privateKey;
+
+    @Column
+    private Date lastTimePasswordUpdated;
 }

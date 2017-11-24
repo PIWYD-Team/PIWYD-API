@@ -1,6 +1,7 @@
 package com.piwyd.web.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.piwyd.password.PasswordRulesService;
 import com.piwyd.user.UserAdapter;
 import com.piwyd.user.UserEntity;
 import com.piwyd.user.UserRepository;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -29,10 +31,12 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     private UserRepository userRepository;
     private TokenAuthenticationService tokenAuthenticationService;
     private UserAdapter userAdapter;
+    private PasswordRulesService passwordRulesService;
 
     private UserEntity userEntity;
 
-    public JWTLoginFilter(String url, AuthenticationManager authManager, UserRepository userRepository, TokenAuthenticationService tokenAuthenticationService, UserAdapter userAdapter, boolean withNewPassword) {
+    public JWTLoginFilter(String url, AuthenticationManager authManager, UserRepository userRepository,
+						  TokenAuthenticationService tokenAuthenticationService, UserAdapter userAdapter, PasswordRulesService passwordRulesService, boolean withNewPassword) {
         super(new AntPathRequestMatcher(url));
         setAuthenticationManager(authManager);
         this.userRepository = userRepository;
@@ -40,6 +44,7 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
         this.userAdapter = userAdapter;
         this.userEntity = null;
         this.withNewPassword = withNewPassword;
+        this.passwordRulesService = passwordRulesService;
     }
 
     @Override
@@ -63,13 +68,16 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
         }
 
 		if (withNewPassword) {
-			// Save the new password and update the user
-			userEntity.setPassword(passwordEncoder.encode(credential.getNewPassword()));
-			userEntity = userRepository.save(userEntity);
+			result = passwordRulesService.isPasswordValid(credential.getNewPassword(), userEntity);
 
-			result = isPasswordValid(credential.getNewPassword());
+			if (result) {
+				// Save the new password and update the user
+				userEntity.setPassword(passwordEncoder.encode(credential.getNewPassword()));
+				userEntity.setLastTimePasswordUpdated(new Date());
+				userEntity = userRepository.save(userEntity);
+			}
 		} else {
-			result = isPasswordValid(credential.getPassword());
+			result = passwordRulesService.isPasswordValid(credential.getPassword(), userEntity);
 		}
 
 		if (!result) {
@@ -89,9 +97,4 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 		// Generate token when successful login
 		tokenAuthenticationService.addAuthentication(res, userAdapter.userToDto(userEntity), AuthState.FIRST_STEP_AUTH);
     }
-
-    private boolean isPasswordValid(final String password) {
-		// TODO: Check validity of the password (expired, doesn't match with current password's rules)
-		return (password.length() > 4);
-	}
 }

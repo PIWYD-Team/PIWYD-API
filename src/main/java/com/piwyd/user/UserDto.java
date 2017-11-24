@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -15,4 +17,5 @@ public class UserDto {
     private String password;
     private String picture;
     private String privateKey;
+    private Date lastTimePasswordUpdated;
 }
