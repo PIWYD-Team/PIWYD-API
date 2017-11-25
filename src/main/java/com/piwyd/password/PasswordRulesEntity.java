@@ -11,7 +11,6 @@ import javax.validation.constraints.Min;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "password")
 public class PasswordRulesEntity {
@@ -38,4 +37,13 @@ public class PasswordRulesEntity {
 
 	@Column
 	private Integer expirationTime;
+
+	public PasswordRulesEntity() {
+		this.requireLowercase = false;
+		this.requireUppercase = false;
+		this.requireNumbers = false;
+		this.requireSpecialCharacters = false;
+		this.minLength = 0;
+		this.expirationTime = 90;
+	}
 }

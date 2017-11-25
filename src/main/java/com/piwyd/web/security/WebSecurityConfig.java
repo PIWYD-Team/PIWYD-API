@@ -1,5 +1,6 @@
 package com.piwyd.web.security;
 
+import com.piwyd.password.PasswordRulesService;
 import com.piwyd.user.UserAdapter;
 import com.piwyd.user.UserRepository;
 import com.piwyd.user.face.FaceService;
@@ -31,6 +32,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
 	private UserAdapter userAdapter;
 
+    @Autowired
+	private PasswordRulesService passwordRulesService;
+
     @Bean
     CorsFilter corsFilter() {
         return new CorsFilter();
@@ -48,9 +52,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and()
                 // We filter the /login requests
-                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository, tokenAuthenticationService, userAdapter, false),
+                .addFilterBefore(new JWTLoginFilter("/login", authenticationManager(), userRepository, tokenAuthenticationService, userAdapter, passwordRulesService, false),
                         UsernamePasswordAuthenticationFilter.class)
-				.addFilterBefore(new JWTLoginFilter("/loginNewPassword", authenticationManager(), userRepository, tokenAuthenticationService, userAdapter, true),
+				.addFilterBefore(new JWTLoginFilter("/loginNewPassword", authenticationManager(), userRepository, tokenAuthenticationService, userAdapter, passwordRulesService, true),
 						UsernamePasswordAuthenticationFilter.class)
                 // We filter the /loginFace requests
                 .addFilterBefore(new JWTLoginFaceFilter("/loginFace", authenticationManager(), faceService, tokenAuthenticationService),

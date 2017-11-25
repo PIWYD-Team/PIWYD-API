@@ -5,7 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAmount;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +25,10 @@ public class PasswordRulesServiceImpl implements PasswordRulesService {
 	@Override
 	@Transactional(readOnly = true)
 	public PasswordRulesDto getPasswordRules() {
-		PasswordRulesEntity entity = passwordRulesRepository.findAll().get(0);
+		PasswordRulesEntity entity = passwordRulesRepository.findAll()
+				.stream()
+				.findFirst()
+				.orElse(new PasswordRulesEntity());
 
 		return passwordRulesAdapter.entityToDto(entity);
 	}
@@ -43,10 +50,12 @@ public class PasswordRulesServiceImpl implements PasswordRulesService {
 		Pattern pattern = Pattern.compile(passwordRulesRegex);
 		Matcher matcher = pattern.matcher(password);
 
-		LocalDate today = LocalDate.now();
-		LocalDate expiredDay = LocalDate.ofEpochDay(userEntity.getLastTimePasswordUpdated().getTime()).plusDays(passwordRules.getExpirationTime());
+		Instant today = Instant.now();
+		Instant lastUpdatedPasswordInstant = userEntity.getLastTimePasswordUpdated().toInstant();
+		TemporalAmount amountToAdd = Duration.ofDays(passwordRules.getExpirationTime());
+		Instant expiredInstant = lastUpdatedPasswordInstant.plus(amountToAdd);
 
-		return matcher.find() && expiredDay.isAfter(today);
+		return matcher.find() && expiredInstant.isAfter(today);
 	}
 
 	private String getPasswordRulesRegex(final PasswordRulesDto passwordRulesDto) {

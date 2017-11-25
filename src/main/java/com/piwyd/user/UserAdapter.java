@@ -13,6 +13,7 @@ public class UserAdapter {
                 .email(userEntity.getEmail())
                 .password(userEntity.getPassword())
 				.privateKey(userEntity.getPrivateKey())
+				.lastTimePasswordUpdated(userEntity.getLastTimePasswordUpdated())
                 .build();
     }
 
@@ -22,6 +23,7 @@ public class UserAdapter {
                 .email(userDto.getEmail())
                 .password(userDto.getPassword())
 				.privateKey(userDto.getPrivateKey())
+				.lastTimePasswordUpdated(userDto.getLastTimePasswordUpdated())
                 .build();
     }
 
@@ -31,6 +33,7 @@ public class UserAdapter {
 		userDto.setEmail((String) map.get("email"));
 		userDto.setPassword((String) map.get("password"));
 		userDto.setPrivateKey((String) map.get("privateKey"));
+		// userDto.setLastTimePasswordUpdated((String) map.get("lastTimePasswordUpdated"));
 
         return userDto;
     }

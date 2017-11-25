@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -45,11 +46,12 @@ public class UserServiceImpl implements UserService {
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(8);
         UserEntity newUser = userAdapter.userToDao(userDto);
+		String privateKey = generatePrivateKey();
+
         newUser.setId(UUID.randomUUID().getMostSignificantBits());
         newUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
-
-        String privateKey = generatePrivateKey();
         newUser.setPrivateKey(privateKey);
+		newUser.setLastTimePasswordUpdated(new Date());
 
         newUser = userRepository.save(newUser);
 
