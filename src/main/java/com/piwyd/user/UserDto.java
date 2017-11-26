@@ -18,4 +18,5 @@ public class UserDto {
     private String picture;
     private String privateKey;
     private Date lastTimePasswordUpdated;
+    private boolean admin;
 }

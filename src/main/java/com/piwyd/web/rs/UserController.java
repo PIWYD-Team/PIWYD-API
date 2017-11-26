@@ -46,6 +46,7 @@ public class UserController {
         if (bindingResult.hasErrors())
             throw new UserValidationException();
 
+        userDto.setAdmin(false);
         UserDto newUser = userService.addUser(userDto);
         return newUser;
     }

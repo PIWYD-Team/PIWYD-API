@@ -8,7 +8,7 @@ spring:
         globally_quoted_identifiers: true
     database: mysql
   datasource:
-    url: jdbc:mysql://localhost:3306/piwyd
+    url: jdbc:mysql://localhost:3306/piwyd?useUnicode=yes&characterEncoding=UTF-8
     username: root
     password: root
     driverClassName: com.mysql.jdbc.Driver

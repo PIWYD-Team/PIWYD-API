@@ -36,7 +36,10 @@ public class PasswordRulesServiceImpl implements PasswordRulesService {
 	@Override
 	@Transactional
 	public PasswordRulesDto updatePasswordRules(final PasswordRulesDto passwordRulesDto) {
+		PasswordRulesDto currentRules = getPasswordRules();
 		PasswordRulesEntity entity = passwordRulesAdapter.dtoToEntity(passwordRulesDto);
+
+		entity.setId(currentRules.getId());
 		entity = passwordRulesRepository.save(entity);
 
 		return passwordRulesAdapter.entityToDto(entity);

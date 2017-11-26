@@ -1,9 +1,6 @@
 package com.piwyd.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -42,5 +39,10 @@ public class UserEntity {
     private String privateKey;
 
     @Column
+	@NotNull
     private Date lastTimePasswordUpdated;
+
+    @Column
+	@NotNull
+    private Boolean admin;
 }

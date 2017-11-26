@@ -14,16 +14,20 @@ public class UserAdapter {
                 .password(userEntity.getPassword())
 				.privateKey(userEntity.getPrivateKey())
 				.lastTimePasswordUpdated(userEntity.getLastTimePasswordUpdated())
+				.admin(userEntity.getAdmin())
                 .build();
     }
 
     public UserEntity userToDao(UserDto userDto) {
+    	Long id = userDto.getId() != null ? Long.parseLong(userDto.getId()) : null;
+
         return UserEntity.builder()
-                .id(Long.parseLong(userDto.getId()))
+                .id(id)
                 .email(userDto.getEmail())
                 .password(userDto.getPassword())
 				.privateKey(userDto.getPrivateKey())
 				.lastTimePasswordUpdated(userDto.getLastTimePasswordUpdated())
+				.admin(userDto.isAdmin())
                 .build();
     }
 
@@ -33,6 +37,7 @@ public class UserAdapter {
 		userDto.setEmail((String) map.get("email"));
 		userDto.setPassword((String) map.get("password"));
 		userDto.setPrivateKey((String) map.get("privateKey"));
+		userDto.setAdmin((boolean) map.get("admin"));
 		// userDto.setLastTimePasswordUpdated((String) map.get("lastTimePasswordUpdated"));
 
         return userDto;
