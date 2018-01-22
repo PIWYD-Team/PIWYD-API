@@ -85,9 +85,11 @@ public class FileServiceImpl implements FileService {
         byte[] process = cbcService.process(CBCServiceImpl.CBCTask.DECRYPTION, userPrivateKey, inputStream);
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(process);
 
+        /** DEBUG **
         FileOutputStream fos = new FileOutputStream(storagePath + "/" + "test.txt");
         fos.write(process);
         fos.close();
+		** FIN DEBUG */
 
         return byteArrayInputStream;
     }
